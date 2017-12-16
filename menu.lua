@@ -23,6 +23,19 @@ local mydata = require( "mydata" )
 
 ------------------------------------ MENU FUNCTIONS -------------------------------------
 
+-------------------------------------- MENU EVENTS --------------------------------------
+
+function scene:create(event)
+    -- Initialize menuScene
+    local menuScene = self.view
+
+    -- Add object, listeners and interacions to menuScene
+    background = display.newImageRect("bckgr.png",900,1425)
+    background.anchorX = 0.5
+    background.anchorY = 1
+end
+
+
 
 
 
