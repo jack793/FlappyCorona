@@ -19,6 +19,14 @@ local scene = composer.newScene()
 local physics = require "physics"
 physics.start()
 
+------ Global useful vars -----
+centerX = display.contentCenterX
+centerY = display.contentCenterY
+screenTop = display.screenOriginY
+screenLeft = display.screenOriginX
+bottomMarg = display.contentHeight - display.screenOriginY
+rightMarg = display.contentWidth - display.screenOriginX
+
 --//local mydata = require( "mydata" )
 
 ------------------------------------ MENU FUNCTIONS -------------------------------------
@@ -53,6 +61,11 @@ end
 
 function titleAnimation()
     titleTransitionDown()
+end
+
+-- loop: infinte rotation of corona player sheet
+local function loop()
+    player.rotation = player.rotation + 10
 end
 
 -------------------------------------- MENU EVENTS --------------------------------------
@@ -91,7 +104,7 @@ function scene:create(event)
     menuScene:insert(platform)
 
     -- Start button
-    start = display.newImageRect("res/start_btn.png",300,65)
+    start = display.newImageRect("res/start_btn.png",400,100)
     start.anchorX = 0.5
     start.anchorY = 1
     start.x = display.contentCenterX
@@ -106,19 +119,13 @@ function scene:create(event)
     player.y = display.contentCenterY
     menuScene:insert(player)
 
-    local function loop()
-        player.rotation = player.rotation + 10
-    end
-
-    Runtime:addEventListener( "enterFrame", loop )
-
     -- -- Title group animation (title + player icon) -- --
     titleGroup = display.newGroup()
-    titleGroup.anchorChildren = true
+    --titleGroup.anchorChildren = true
     titleGroup.anchorX = 0.5
     titleGroup.anchorY = 0.5
-    titleGroup.x = display.contentCenterX
-    titleGroup.y = display.contentCenterY - 250
+    titleGroup.x = centerX - 370
+    titleGroup.y = screenTop - 300
 
     titleGroup:insert(title)
     titleGroup:insert(player)
@@ -144,9 +151,6 @@ function scene:show(event)
 
         composer.removeScene("restart")
         start:addEventListener("touch", startGame)
-
-        platform.enterFrame = groundScroller
-        --//Runtime:addEventListener("enterFrame", platform)
     end
 
 end
@@ -187,6 +191,10 @@ scene:addEventListener("create", scene)
 scene:addEventListener("show", scene)
 scene:addEventListener("hide", scene)
 scene:addEventListener("destroy", scene)
+
+-- player sheet rotation loop
+Runtime:addEventListener( "enterFrame", loop )
+
 
 -----------------------------------------------------------------------------------------
 
