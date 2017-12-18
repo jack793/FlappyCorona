@@ -38,16 +38,6 @@ function startGame(event)
     end
 end
 
--- groundScroller: function for scroll the platform base to reproduce forward loop movement
-function groundScroller(self,event)
-
-    if self.x < (-900 + (self.speed*2)) then
-        self.x = 900
-    else
-        self.x = self.x - self.speed
-    end
-end
-
 -- Title animation: it's a compostition of 3 small functions that bounce the title group
 function titleTransitionDown()
     downTransition = transition.to(titleGroup,{time=400, y=titleGroup.y+20,onComplete=titleTransitionUp})
@@ -64,7 +54,7 @@ function titleAnimation()
 end
 
 -- loop: infinte rotation of corona player sheet
-local function loop()
+local function rotationLoop()
     player.rotation = player.rotation + 10
 end
 
@@ -94,11 +84,11 @@ function scene:create(event)
     menuScene:insert(title)
 
     -- Platform
-    platform = display.newImageRect("res/platform.png",900,53)
+    platform = display.newImageRect("res/ground.png",900,200)
     platform.anchorX = 0
     platform.anchorY = 1
     platform.x = 0
-    platform.y = display.viewableContentHeight - 110
+    platform.y = display.viewableContentHeight
     physics.addBody(platform, "static", {density=.1, bounce=0.1, friction=.2})
     platform.speed = 4
     menuScene:insert(platform)
@@ -121,7 +111,7 @@ function scene:create(event)
 
     -- -- Title group animation (title + player icon) -- --
     titleGroup = display.newGroup()
-    --titleGroup.anchorChildren = true
+    -- titleGroup.anchorChildren = true
     titleGroup.anchorX = 0.5
     titleGroup.anchorY = 0.5
     titleGroup.x = centerX - 370
@@ -193,7 +183,7 @@ scene:addEventListener("hide", scene)
 scene:addEventListener("destroy", scene)
 
 -- player sheet rotation loop
-Runtime:addEventListener( "enterFrame", loop )
+Runtime:addEventListener( "enterFrame", rotationLoop )
 
 
 -----------------------------------------------------------------------------------------
