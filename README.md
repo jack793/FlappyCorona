@@ -3,7 +3,7 @@ Project of MDP course - 2017 - Corona
 
 #### -- Development of game similar to "Flappy Bird" logic, using Corona framework  --
 
-#### Goal of project:
+#### Goals of project:
 
 1. Develop an application using this framework;
 
