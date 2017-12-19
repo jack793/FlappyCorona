@@ -19,15 +19,8 @@ local scene = composer.newScene()
 local physics = require "physics"
 physics.start()
 
------- Global useful vars -----
-centerX = display.contentCenterX
-centerY = display.contentCenterY
-screenTop = display.screenOriginY
-screenLeft = display.screenOriginX
-bottomMarg = display.contentHeight - display.screenOriginY
-rightMarg = display.contentWidth - display.screenOriginX
-
---//local mydata = require( "mydata" )
+-- include mydata
+local data = require("data")
 
 ------------------------------------ MENU FUNCTIONS -------------------------------------
 
@@ -76,10 +69,10 @@ function scene:create(event)
     menuScene:insert(background)
 
     -- Title
-    title = display.newImageRect("res/title.png",300,100)
+    title = display.newImageRect("res/title.png",483,232)
     title.anchorX = 0.5
     title.anchorY = 0.5
-    title.x = display.contentCenterX - 20
+    title.x = display.contentCenterX - 200
     title.y = display.contentCenterY
     menuScene:insert(title)
 
@@ -105,17 +98,17 @@ function scene:create(event)
     player = display.newImageRect("res/corona.png",128,128)
     player.anchorX = 0.5
     player.anchorY = 0.5
-    player.x = display.contentCenterX + 240
+    player.x = display.contentCenterX + 120
     player.y = display.contentCenterY
     menuScene:insert(player)
 
     -- -- Title group animation (title + player icon) -- --
     titleGroup = display.newGroup()
-    -- titleGroup.anchorChildren = true
+    -- titleGroup.anchorChildren = true <<<---- This line destroy layout cause the corona logo animation
     titleGroup.anchorX = 0.5
     titleGroup.anchorY = 0.5
-    titleGroup.x = centerX - 370
-    titleGroup.y = screenTop - 300
+    titleGroup.x = display.contentCenterX - 260
+    titleGroup.y = display.contentCenterY - 1000
 
     titleGroup:insert(title)
     titleGroup:insert(player)

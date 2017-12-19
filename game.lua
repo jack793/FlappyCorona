@@ -25,7 +25,7 @@ physics.setGravity(0,100)
 
 local gameStarted = false
 
-local mydata = require("mydata")
+local data = require("data")
 
 ------ Global useful vars -----
 centerX = display.contentCenterX
@@ -68,8 +68,8 @@ function moveColumns()
     for a = elements.numChildren,1,-1  do
         if(elements[a].x < display.contentCenterX - 170) then
             if elements[a].scoreAdded == false then
-                mydata.score = mydata.score + 1
-                tb.text = mydata.score
+                data.score = data.score + 1
+                tb.text = data.score
                 elements[a].scoreAdded = true
             end
         end
@@ -140,7 +140,7 @@ function scene:create(event)
     local gameScene = self.view
 
     gameStarted = false
-    mydata.score = 0
+    data.score = 0
 
     -- Add object, listeners and interacions to gameScene
 
@@ -174,25 +174,6 @@ function scene:create(event)
     ground.y = display.contentHeight
     gameScene:insert(ground)
 
-    -- Platforms
-    platform = display.newImageRect('res/platform.png',900,53)
-    platform.anchorX = 0
-    platform.anchorY = 1
-    platform.x = 0
-    platform.y = display.viewableContentHeight - 110
-    physics.addBody(platform, "static", {density=.1, bounce=0.1, friction=.2})
-    platform.speed = 4
-    gameScene:insert(platform)
-
-    platform2 = display.newImageRect('res/platform.png',900,53)
-    platform2.anchorX = 0
-    platform2.anchorY = 1
-    platform2.x = platform2.width
-    platform2.y = display.viewableContentHeight - 110
-    physics.addBody(platform2, "static", {density=.1, bounce=0.1, friction=.2})
-    platform2.speed = 4
-    gameScene:insert(platform2)
-
     -- Player icon
     player = display.newImageRect("res/corona.png",64,64)
     player.anchorX = 0.5
@@ -202,7 +183,7 @@ function scene:create(event)
     gameScene:insert(player)
 
     -- Score table
-    tb = display.newText(mydata.score,display.contentCenterX,
+    tb = display.newText(data.score,display.contentCenterX,
         150, "pixelmix", 58)
     tb:setFillColor(0,0,0)
     tb.alpha = 0
@@ -234,11 +215,9 @@ function scene:show(event)
         composer.removeScene("start")
         Runtime:addEventListener("touch", flyUpCorona)
 
-        platform.enterFrame = platformScroller
-        Runtime:addEventListener("enterFrame", platform)
+        ground.enterFrame = platformScroller
+        Runtime:addEventListener("enterFrame", ground)
 
-        platform2.enterFrame = platformScroller
-        Runtime:addEventListener("enterFrame", platform2)
 
         Runtime:addEventListener("collision", onCollision)
 
