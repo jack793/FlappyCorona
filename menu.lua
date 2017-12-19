@@ -46,9 +46,18 @@ function titleAnimation()
     titleTransitionDown()
 end
 
--- loop: infinte rotation of corona player sheet
-local function rotationLoop()
+-- rotation loop functions
+-- TODO Refactor in 2 functions with input parameters
+function rotationLoop()
     player.rotation = player.rotation + 10
+end
+
+function rotationLoopGear()
+    big_gear.rotation = big_gear.rotation + 0.1
+end
+
+function rotationLoopSmallGear()
+    small_gear.rotation = small_gear.rotation - 0.2
 end
 
 -------------------------------------- MENU EVENTS --------------------------------------
@@ -68,6 +77,21 @@ function scene:create(event)
     background.y = display.contentHeight
     menuScene:insert(background)
 
+    -- Gears
+    big_gear = display.newImageRect("res/bigGear.png",800,800)
+    big_gear.anchorX = 0.5
+    big_gear.anchorY = 0.5
+    big_gear.x = display.contentCenterX - 200
+    big_gear.y = display.contentCenterY + 200
+    menuScene:insert(big_gear)
+
+    small_gear = display.newImageRect("res/smallGear.png",500,500)
+    small_gear.anchorX = 0.5
+    small_gear.anchorY = 0.5
+    small_gear.x = display.contentCenterX + 420
+    small_gear.y = display.contentCenterY + 350
+    menuScene:insert(small_gear)
+
     -- Title
     title = display.newImageRect("res/title.png",483,232)
     title.anchorX = 0.5
@@ -76,15 +100,15 @@ function scene:create(event)
     title.y = display.contentCenterY
     menuScene:insert(title)
 
-    -- Platform
-    platform = display.newImageRect("res/ground.png",900,200)
-    platform.anchorX = 0
-    platform.anchorY = 1
-    platform.x = 0
-    platform.y = display.viewableContentHeight
-    physics.addBody(platform, "static", {density=.1, bounce=0.1, friction=.2})
-    platform.speed = 4
-    menuScene:insert(platform)
+    -- Ground
+    ground = display.newImageRect("res/ground.png",900,200)
+    ground.anchorX = 0
+    ground.anchorY = 1
+    ground.x = 0
+    ground.y = display.viewableContentHeight
+    physics.addBody(ground, "static", {density=.1, bounce=.1, friction=.2})
+    ground.speed = 4
+    menuScene:insert(ground)
 
     -- Start button
     start = display.newImageRect("res/start_btn.png",400,100)
@@ -108,7 +132,7 @@ function scene:create(event)
     titleGroup.anchorX = 0.5
     titleGroup.anchorY = 0.5
     titleGroup.x = display.contentCenterX - 260
-    titleGroup.y = display.contentCenterY - 1000
+    titleGroup.y = display.contentCenterY - 1050
 
     titleGroup:insert(title)
     titleGroup:insert(player)
@@ -149,7 +173,7 @@ function scene:hide(event)
         -- Insert code here to "pause" the scene.
         -- Example: stop timers, stop animation, stop audio, etc.
         start:removeEventListener("touch", startGame)
-        Runtime:removeEventListener("enterFrame", platform)
+        Runtime:removeEventListener("enterFrame", ground)
         transition.cancel(downTransition)
         transition.cancel(upTransition)
     elseif ( phase == "did" ) then
@@ -176,7 +200,9 @@ scene:addEventListener("hide", scene)
 scene:addEventListener("destroy", scene)
 
 -- player sheet rotation loop
-Runtime:addEventListener( "enterFrame", rotationLoop )
+Runtime:addEventListener("enterFrame", rotationLoop)
+Runtime:addEventListener("enterFrame", rotationLoopGear)
+Runtime:addEventListener("enterFrame", rotationLoopSmallGear)
 
 
 -----------------------------------------------------------------------------------------
