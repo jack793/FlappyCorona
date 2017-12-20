@@ -25,25 +25,29 @@ physics.setGravity(0,100)
 
 local gameStarted = false
 
-local data = require("data")
-
------- Global useful vars -----
-centerX = display.contentCenterX
-centerY = display.contentCenterY
-screenTop = display.screenOriginY
-screenLeft = display.screenOriginX
-bottomMarg = display.contentHeight - display.screenOriginY
-rightMarg = display.contentWidth - display.screenOriginX
+local data = require("wrtest")
 
 ------------------------------------ GAME FUNCTIONS -------------------------------------
 
 -- onCollision: function for trigger LOSER PLAYER =((
 function onCollision(event)
+
     if (event.phase == "began") then
         composer.gotoScene("restart")
     end
 end
 
+-- groundScroller: function name explain itself, niub
+function groundScroller(self)
+
+    if self.x < (-900 + (self.speed*2)) then
+        self.x = 900
+    else
+        self.x = self.x - self.speed
+    end
+end
+
+-- flyUpCorona: function to give force to jump up when corona sheet is tapped
 function flyUpCorona(event)
 
     if event.phase == "began" then
@@ -55,10 +59,10 @@ function flyUpCorona(event)
             addColumnTimer = timer.performWithDelay(1000, addColumns, -1)
             moveColumnTimer = timer.performWithDelay(2, moveColumns, -1)
             gameStarted = true
-            player:applyForce(0, -300, player.x, player.y)
+            player:applyForce(0, -650, player.x, player.y)
         else
 
-            player:applyForce(0, -600, player.x, player.y)
+            player:applyForce(0, -1300, player.x, player.y)
 
         end
     end
@@ -85,7 +89,7 @@ function addColumns()
 
     height = math.random(display.contentCenterY - 200, display.contentCenterY + 200)
 
-    topColumn = display.newImageRect('topColumn.png',100,714)
+    topColumn = display.newImageRect('res/topColumn.png',100,714)
     topColumn.anchorX = 0.5
     topColumn.anchorY = 1
     topColumn.x = display.contentWidth + 100
@@ -94,7 +98,7 @@ function addColumns()
     physics.addBody(topColumn, "static", {density=1, bounce=0.1, friction=.2})
     elements:insert(topColumn)
 
-    bottomColumn = display.newImageRect('bottomColumn.png',100,714)
+    bottomColumn = display.newImageRect('res/bottomColumn.png',100,714)
     bottomColumn.anchorX = 0.5
     bottomColumn.anchorY = 0
     bottomColumn.x = display.contentWidth + 100
@@ -106,8 +110,8 @@ end
 
 local function checkMemory()
     collectgarbage( "collect" )
-    local memUsage_str = string.format( "MEMORY = %.3f KB", collectgarbage( "count" ) )
-    --print( memUsage_str, "TEXTURE = "..(system.getInfo("textureMemoryUsed") / (1024 * 1024) ) )
+    local memUsage_str = string.format("MEMORY = %.3f KB", collectgarbage("count"))
+    print( memUsage_str, "TEXTURE = "..(system.getInfo("textureMemoryUsed") / (1024 * 1024)))
 end
 
 -- groundScroller: function for scroll the platform base to reproduce forward loop movement
@@ -125,10 +129,10 @@ local function rotationLoop()
     player.rotation = player.rotation + 10
 end
 
--- acceleration: function that accelerate the rotation, called when player sheet is tapped
+--[[-- acceleration: function that accelerate the rotation, called when player sheet is tapped
 local function acceleration()
-    player.rotation = player.rotation + 10
-end
+    player.rotation = player.rotation + 20
+end]]
 
 
 -------------------------------------- GAME EVENTS --------------------------------------
@@ -140,7 +144,6 @@ function scene:create(event)
     local gameScene = self.view
 
     gameStarted = false
-    data.score = 0
 
     -- Add object, listeners and interacions to gameScene
 
@@ -175,16 +178,17 @@ function scene:create(event)
     gameScene:insert(ground)
 
     -- Player icon
-    player = display.newImageRect("res/corona.png",64,64)
+    player = display.newImageRect("res/corona.png",100,100)
     player.anchorX = 0.5
     player.anchorY = 0.5
     player.x = display.contentCenterX + 70
     player.y = display.contentCenterY - 200
+    physics.addBody(player, "static", {density=.1, bounce=0.1, friction=1})
+    player:applyForce(0, -300, player.x, player.y)
     gameScene:insert(player)
 
     -- Score table
-    tb = display.newText(data.score,display.contentCenterX,
-        150, "pixelmix", 58)
+    tb = display.newText(data.score,display.contentCenterX, 150, "pixelmix", 58)
     tb:setFillColor(0,0,0)
     tb.alpha = 0
     gameScene:insert(tb)
@@ -218,10 +222,9 @@ function scene:show(event)
         ground.enterFrame = platformScroller
         Runtime:addEventListener("enterFrame", ground)
 
-
         Runtime:addEventListener("collision", onCollision)
 
-        memTimer = timer.performWithDelay( 1000, checkMemory, 0 ) -- looppalo
+        memTimer = timer.performWithDelay( 1000, checkMemory, 0 ) -- looppalo for memory and performance check
 
     end
 end
@@ -237,27 +240,33 @@ function scene:hide(event)
         -- Insert code here to "pause" the scene.
         -- Example: stop timers, stop animation, stop audio, etc.
         Runtime:removeEventListener("touch", flyUp)
-        Runtime:removeEventListener("enterFrame", platform)
-        Runtime:removeEventListener("enterFrame", platform2)
         Runtime:removeEventListener("collision", onCollision)
         timer.cancel(addColumnTimer)
         timer.cancel(moveColumnTimer)
         timer.cancel(memTimer)
-
 
     elseif ( phase == "did" ) then
         -- Called immediately after scene goes off screen.
     end
 end
 
+---- :DESTROY
+function scene:destroy( event )
+
+    local sceneGroup = self.view
+
+    -- Called prior to the removal of scene's view ("sceneGroup").
+    -- Insert code here to clean up the scene.
+    -- Example: remove display objects, save state, etc.
+end
 
 ---------------------------------------------------------------------------------
 
 -- Listener setup
-scene:addEventListener( "create", scene )
-scene:addEventListener( "show", scene )
-scene:addEventListener( "hide", scene )
-scene:addEventListener( "destroy", scene )
+scene:addEventListener("create", scene)
+scene:addEventListener("show", scene)
+scene:addEventListener("hide", scene)
+scene:addEventListener("destroy", scene)
 
 ---------------------------------------------------------------------------------
 
