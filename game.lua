@@ -95,7 +95,7 @@ function addColumns()
     topColumn = display.newImageRect('res/topColumn.png',100,714)
     topColumn.anchorX = 0.5
     topColumn.anchorY = 1
-    topColumn.x = display.contentWidth + 100
+    topColumn.x = display.contentWidth + 150
     topColumn.y = height - 160
     topColumn.scoreAdded = false
     physics.addBody(topColumn, "static", {density=1, bounce=0.1, friction=.2})
@@ -104,7 +104,7 @@ function addColumns()
     bottomColumn = display.newImageRect('res/bottomColumn.png',100,714)
     bottomColumn.anchorX = 0.5
     bottomColumn.anchorY = 0
-    bottomColumn.x = display.contentWidth + 100
+    bottomColumn.x = display.contentWidth + 150
     bottomColumn.y = height + 160
     physics.addBody(bottomColumn, "static", {density=1, bounce=0.1, friction=.2})
     elements:insert(bottomColumn)
