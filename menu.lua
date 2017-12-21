@@ -20,7 +20,7 @@ local physics = require "physics"
 physics.start()
 
 -- include mydata
-local data = require("data")
+-- local data = require("score")
 
 ------------------------------------ MENU FUNCTIONS -------------------------------------
 

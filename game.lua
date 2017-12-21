@@ -25,16 +25,24 @@ physics.setGravity(0,100)
 
 local gameStarted = false
 
+--data = require("score")
+
 score = "0"
 
 --/local data = require("wrtest")
 
 ------------------------------------ GAME FUNCTIONS -------------------------------------
 
+-- ||| getThisGameScore: only for debugging |||
+function getThisGameScore()
+    print(score)
+end
+
 -- onCollision: function for trigger LOSER PLAYER =((
 function onCollision(event)
 
     if (event.phase == "began") then
+        getThisGameScore()
         composer.gotoScene("restart")
     end
 end
@@ -191,7 +199,7 @@ function scene:create(event)
     gameScene:insert(player)
 
     -- Score table
-    tb = display.newText(score,display.contentCenterX, 150, "pixelmix", 58)
+    tb = display.newText(score,display.contentCenterX, 150, "Arial" , 58)
     tb:setFillColor(0,0,0)
     tb.alpha = 0
     gameScene:insert(tb)
