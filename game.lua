@@ -25,7 +25,9 @@ physics.setGravity(0,100)
 
 local gameStarted = false
 
-local data = require("wrtest")
+score = "0"
+
+--/local data = require("wrtest")
 
 ------------------------------------ GAME FUNCTIONS -------------------------------------
 
@@ -72,8 +74,9 @@ function moveColumns()
     for a = elements.numChildren,1,-1  do
         if(elements[a].x < display.contentCenterX - 170) then
             if elements[a].scoreAdded == false then
-                data.score = data.score + 1
-                tb.text = data.score
+                --data.score = data.score + 1
+                score = score + 1
+                tb.text = score
                 elements[a].scoreAdded = true
             end
         end
@@ -181,14 +184,14 @@ function scene:create(event)
     player = display.newImageRect("res/corona.png",100,100)
     player.anchorX = 0.5
     player.anchorY = 0.5
-    player.x = display.contentCenterX + 70
-    player.y = display.contentCenterY - 200
+    player.x = display.contentCenterX - 150
+    player.y = display.contentCenterY
     physics.addBody(player, "static", {density=.1, bounce=0.1, friction=1})
     player:applyForce(0, -300, player.x, player.y)
     gameScene:insert(player)
 
     -- Score table
-    tb = display.newText(data.score,display.contentCenterX, 150, "pixelmix", 58)
+    tb = display.newText(score,display.contentCenterX, 150, "pixelmix", 58)
     tb:setFillColor(0,0,0)
     tb.alpha = 0
     gameScene:insert(tb)
