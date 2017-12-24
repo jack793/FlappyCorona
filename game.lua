@@ -20,30 +20,31 @@ local scene = composer.newScene()
 -- include physics and data deps
 local physics = require "physics"
 physics.start()
+
 -- Set gravity of the scene physics
 physics.setGravity(0,100)
 
+-- Initialize variables
+local score = 0
 local gameStarted = false
-
---data = require("score")
-
-score = "0"
-
---/local data = require("wrtest")
 
 ------------------------------------ GAME FUNCTIONS -------------------------------------
 
 -- ||| getThisGameScore: only for debugging |||
 function getThisGameScore()
-    print(score)
+    print("final score: " .. score)
 end
 
--- onCollision: function for trigger LOSER PLAYER =((
-function onCollision(event)
-
+-- endGame: function for trigger LOSER PLAYER =((
+function endGame(event)
     if (event.phase == "began") then
         getThisGameScore()
-        composer.gotoScene("restart")
+
+        -- WE SET A GLOBAL COMPOSER VARIABLE, VISIBLE TO ALL SCENES TROUGHT COMPOSER, CALLED 'finalscore'
+        composer.setVariable("finalScore", score)
+
+        -- Finally, go to the end game scene
+        composer.gotoScene("scores",{timer=800, effect="crossFade"})
     end
 end
 
@@ -82,7 +83,6 @@ function moveColumns()
     for a = elements.numChildren,1,-1  do
         if(elements[a].x < display.contentCenterX - 170) then
             if elements[a].scoreAdded == false then
-                --data.score = data.score + 1
                 score = score + 1
                 tb.text = score
                 elements[a].scoreAdded = true
@@ -233,7 +233,7 @@ function scene:show(event)
         ground.enterFrame = platformScroller
         Runtime:addEventListener("enterFrame", ground)
 
-        Runtime:addEventListener("collision", onCollision)
+        Runtime:addEventListener("collision", endGame)
 
         memTimer = timer.performWithDelay( 1000, checkMemory, 0 ) -- looppalo for memory and performance check
 
@@ -251,7 +251,7 @@ function scene:hide(event)
         -- Insert code here to "pause" the scene.
         -- Example: stop timers, stop animation, stop audio, etc.
         Runtime:removeEventListener("touch", flyUp)
-        Runtime:removeEventListener("collision", onCollision)
+        Runtime:removeEventListener("collision", endGame)
         timer.cancel(addColumnTimer)
         timer.cancel(moveColumnTimer)
         timer.cancel(memTimer)

@@ -19,9 +19,6 @@ local scene = composer.newScene()
 local physics = require "physics"
 physics.start()
 
--- include mydata
--- local data = require("score")
-
 ------------------------------------ MENU FUNCTIONS -------------------------------------
 
 -- startGame: after click start button, let's go to the game!
