@@ -79,6 +79,7 @@ function flyUpCorona(event)
     end
 end
 
+-- moveColumns: using for calculate player sheet and columns moves and determinate when increment current score
 function moveColumns()
     for a = elements.numChildren,1,-1  do
         if(elements[a].x < display.contentCenterX - 170) then
@@ -96,6 +97,7 @@ function moveColumns()
     end
 end
 
+-- addColumns: function that randomly generate the columns witch appears during game
 function addColumns()
 
     height = math.random(display.contentCenterY - 200, display.contentCenterY + 200)
@@ -119,14 +121,8 @@ function addColumns()
 
 end
 
-local function checkMemory()
-    collectgarbage( "collect" )
-    local memUsage_str = string.format("MEMORY = %.3f KB", collectgarbage("count"))
-    print( memUsage_str, "TEXTURE = "..(system.getInfo("textureMemoryUsed") / (1024 * 1024)))
-end
-
 -- groundScroller: function for scroll the platform base to reproduce forward loop movement
-function groundScroller(self,event)
+function groundScroller(self)
 
     if self.x < (-900 + (self.speed*2)) then
         self.x = 900
@@ -136,15 +132,17 @@ function groundScroller(self,event)
 end
 
 -- loop: infinte rotation of corona player sheet
-local function rotationLoop()
+function rotationLoop()
     player.rotation = player.rotation + 10
 end
 
---[[-- acceleration: function that accelerate the rotation, called when player sheet is tapped
-local function acceleration()
-    player.rotation = player.rotation + 20
-end]]
+--------- PERFORMANCE DEBUGGING ---------
 
+local function checkMemory()
+    collectgarbage( "collect" )
+    local memUsage_str = string.format("MEMORY = %.3f KB", collectgarbage("count"))
+    print( memUsage_str, "TEXTURE = "..(system.getInfo("textureMemoryUsed") / (1024 * 1024)))
+end
 
 -------------------------------------- GAME EVENTS --------------------------------------
 
@@ -171,7 +169,7 @@ function scene:create(event)
     background.speed = 4
     gameScene:insert(background)
 
-    -- TODO ?????
+    -- use for moving and calculate scores w/ columns
     elements = display.newGroup()
     elements.anchorChildren = true
     elements.anchorX = 0
@@ -186,6 +184,8 @@ function scene:create(event)
     ground.anchorY = 1
     ground.x = 0
     ground.y = display.contentHeight
+    physics.addBody(ground, "static", {density=.1, bounce=0.1, friction=.2})
+    ground.speed = 4
     gameScene:insert(ground)
 
     -- Player icon
@@ -199,7 +199,7 @@ function scene:create(event)
     gameScene:insert(player)
 
     -- Score table
-    tb = display.newText(score,display.contentCenterX, 150, "Arial" , 58)
+    tb = display.newText(score,display.contentCenterX, 150, "Arial", 58)
     tb:setFillColor(0,0,0)
     tb.alpha = 0
     gameScene:insert(tb)
@@ -227,15 +227,16 @@ function scene:show(event)
         -- Insert code here to make the scene come alive.
         -- Example: start timers, begin animation, play audio, etc.
 
-        composer.removeScene("start")
+        composer.removeScene("menu")
+
         Runtime:addEventListener("touch", flyUpCorona)
 
-        ground.enterFrame = platformScroller
+        ground.enterFrame = groundScroller
         Runtime:addEventListener("enterFrame", ground)
 
         Runtime:addEventListener("collision", endGame)
 
-        memTimer = timer.performWithDelay( 1000, checkMemory, 0 ) -- looppalo for memory and performance check
+        memTimer = timer.performWithDelay( 2000, checkMemory, 0 ) -- looppalo for memory and performance check
 
     end
 end
@@ -246,17 +247,19 @@ function scene:hide(event)
     local gameScene = self.view
     local phase = event.phase
 
-    if ( phase == "will" ) then
+    if (phase == "will") then
         -- Called when the scene is on screen (but is about to go off screen).
         -- Insert code here to "pause" the scene.
         -- Example: stop timers, stop animation, stop audio, etc.
         Runtime:removeEventListener("touch", flyUp)
+        Runtime:removeEventListener("enterFrame", ground)
+        Runtime:removeEventListener("enterframe", rotationLoop)
         Runtime:removeEventListener("collision", endGame)
         timer.cancel(addColumnTimer)
         timer.cancel(moveColumnTimer)
         timer.cancel(memTimer)
 
-    elseif ( phase == "did" ) then
+    elseif (phase == "did") then
         -- Called immediately after scene goes off screen.
     end
 end
@@ -270,6 +273,7 @@ function scene:destroy( event )
     -- Insert code here to clean up the scene.
     -- Example: remove display objects, save state, etc.
 end
+
 
 ---------------------------------------------------------------------------------
 

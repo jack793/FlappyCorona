@@ -28,6 +28,17 @@ function startGame(event)
     end
 end
 
+--[[-- groundScroller: endless ground scroll
+function groundScroller(self)
+
+    if self.x < (-900 + (self.speed*2)) then
+        self.x = 900
+    else
+        self.x = self.x - self.speed
+    end
+
+end]]
+
 -- Title animation: it's a compostition of 3 small functions that bounce the title group
 function titleTransitionDown()
     downTransition = transition.to(titleGroup,{time=400, y=titleGroup.y+20,onComplete=titleTransitionUp})
@@ -98,7 +109,7 @@ function scene:create(event)
     menuScene:insert(title)
 
     -- Ground
-    ground = display.newImageRect("res/ground.png",900,200)
+    ground = display.newImageRect("res/ground.png",900,162)
     ground.anchorX = 0
     ground.anchorY = 1
     ground.x = 0
@@ -145,16 +156,23 @@ function scene:show(event)
     local menuScene = self.view
     local phase = event.phase
 
-    if ( phase == "will" ) then
+    if (phase == "will") then
         -- Called when the scene is still off screen (but is about to come on screen).
-    elseif ( phase == "did" ) then
+    elseif (phase == "did") then
         -- Called when the scene is now on screen.
         -- Insert code to make the scene come alive.
         -- Example: start timers, begin animation, play audio, etc.
-        composer.removeScene("restart")
+        composer.removeScene("scores")
 
-        composer.removeScene("restart")
         start:addEventListener("touch", startGame)
+
+        --ground.enterFrame = groundScroller
+        --Runtime:addEventListener("enterFrame", ground)
+
+        -- player sheet rotation loop
+        Runtime:addEventListener("enterFrame", rotationLoop)
+        Runtime:addEventListener("enterFrame", rotationLoopGear)
+        Runtime:addEventListener("enterFrame", rotationLoopSmallGear)
     end
 
 end
@@ -165,15 +183,18 @@ function scene:hide(event)
     local menuScene = self.view
     local phase = event.phase
 
-    if ( phase == "will" ) then
+    if (phase == "will") then
         -- Called when the scene is on screen (but is about to go off screen).
         -- Insert code here to "pause" the scene.
         -- Example: stop timers, stop animation, stop audio, etc.
         start:removeEventListener("touch", startGame)
         Runtime:removeEventListener("enterFrame", ground)
+        Runtime:removeEventListener("enterframe", rotationLoop)
+        Runtime:removeEventListener("enterFrame", rotationLoopGear)
+        Runtime:removeEventListener("enterFrame", rotationLoopSmallGear)
         transition.cancel(downTransition)
         transition.cancel(upTransition)
-    elseif ( phase == "did" ) then
+    elseif (phase == "did") then
         -- Called immediately after scene goes off screen.
     end
 end
@@ -195,11 +216,6 @@ scene:addEventListener("create", scene)
 scene:addEventListener("show", scene)
 scene:addEventListener("hide", scene)
 scene:addEventListener("destroy", scene)
-
--- player sheet rotation loop
-Runtime:addEventListener("enterFrame", rotationLoop)
-Runtime:addEventListener("enterFrame", rotationLoopGear)
-Runtime:addEventListener("enterFrame", rotationLoopSmallGear)
 
 
 -----------------------------------------------------------------------------------------

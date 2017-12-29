@@ -15,6 +15,13 @@
 local composer = require "composer"
 local scene = composer.newScene()
 
+-- include physics and data deps
+local physics = require "physics"
+physics.start()
+
+-- Set gravity of the scene physics
+physics.setGravity(0,100)
+
 -- Initialize  DATA variables
 local json = require("json")
 
@@ -182,7 +189,7 @@ end
 --- :SHOW
 function scene:show( event )
 
-    local sceneGroup = self.view
+    local scoresScene = self.view
     local phase = event.phase
 
     if (phase == "will") then
@@ -190,7 +197,8 @@ function scene:show( event )
 
     elseif (phase == "did") then
         -- Code here runs when the scene is entirely on screen
-        composer.removeScene("game")
+        --composer.removeScene("game")
+
         restart:addEventListener("touch", restartGame)
         showGameOver()
         loadScores()
