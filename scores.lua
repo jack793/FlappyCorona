@@ -62,8 +62,8 @@ end
 -- saveScores: Write in the data file, always overwrite in 'w' mode (encode lua_table-->json after writing)
 local function saveScores()
 
-    -- Remove previus data
-    table.remove(scoresTable, i)
+    --[[-- Remove previus data
+    table.remove(scoresTable, i)]]
 
     local file = io.open(filePath, "w")
 
@@ -77,25 +77,25 @@ end
 -- showRestart: show restart btn with scores
 function showRestart()
     restartTransition = transition.to(restart,{time=200, alpha=1})
-    scoreTextTransition = transition.to(scoreText,{time=600, alpha=1})
-    scoreTextTransition = transition.to(bestscoreText,{time=600, alpha=1})
+    scoreTextTransition = transition.to(scoreText,{time=500, alpha=1})
+    bestTextTransition = transition.to(bestscoreText,{time=500, alpha=1})
 end
 
 -- showScore: fadeIn scores calling showRestart() funct
 function showScore()
-    scoreTransition = transition.to(gameScores,{time=600, y=display.contentCenterY,onComplete=showRestart})
+    scoreTransition = transition.to(gameScores,{time=500, y=display.contentCenterY,onComplete=showRestart})
 end
 
 -- showGameOver: fadeIn 'gameover' image on the top of screen, it's the first thing to do..LOSEEER
 function showGameOver()
-    fadeTransition = transition.to(gameOver,{time=600, alpha=1,onComplete=showScore})
+    fadeTransition = transition.to(gameOver,{time=500, alpha=1,onComplete=showScore})
 end
 
 -- gotoMenu explain itself
 function gotoMenu(event)
     if event.phase == "ended" then
         saveScores()
-        composer.gotoScene("menu", {time=1000, effect="crossFade"})
+        composer.gotoScene("menu", {time=500, effect="fade"})
     end
 end
 
@@ -103,7 +103,7 @@ end
 function restartGame(event)
     if event.phase == "ended" then
         saveScores()
-        composer.gotoScene("game")
+        composer.gotoScene("game", {timer=1000, effect="fade"})
     end
 end
 
@@ -197,9 +197,9 @@ function scene:show( event )
 
     elseif (phase == "did") then
         -- Code here runs when the scene is entirely on screen
-        --composer.removeScene("game")
+        composer.removeScene("game")
 
-        restart:addEventListener("touch", restartGame)
+        restart:addEventListener("touch", gotoMenu)
         showGameOver()
         loadScores()
 
@@ -215,15 +215,15 @@ function scene:hide( event )
     if ( phase == "will" ) then
         -- Code here runs when the scene is on screen (but is about to go off screen)
         --
-        restart:removeEventListener("touch", restartGame)
+        restart:removeEventListener("touch", gotoMenu)
         transition.cancel(fadeTransition)
         transition.cancel(scoreTransition)
         transition.cancel(scoreTextTransition)
-        transition.cancel(startTransition)
+        transition.cancel(bestTextTransition)
+        transition.cancel(restartTransition)
 
     elseif ( phase == "did" ) then
         -- Code here runs immediately after the scene goes entirely off screen
-        composer.removeScene("scores")
     end
 end
 

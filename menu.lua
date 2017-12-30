@@ -56,16 +56,16 @@ end
 
 -- rotation loop functions
 -- TODO Refactor in 2 functions with input parameters
-function rotationLoop()
+function rotationLoopPlayer()
     player.rotation = player.rotation + 10
 end
 
 function rotationLoopGear()
-    big_gear.rotation = big_gear.rotation + 0.1
+    --big_gear.rotation = big_gear.rotation + 0.1
 end
 
 function rotationLoopSmallGear()
-    small_gear.rotation = small_gear.rotation - 0.2
+    --small_gear.rotation = small_gear.rotation - 0.2
 end
 
 -------------------------------------- MENU EVENTS --------------------------------------
@@ -133,6 +133,7 @@ function scene:create(event)
     player.x = display.contentCenterX + 120
     player.y = display.contentCenterY
     menuScene:insert(player)
+    --timer.performWithDelay( 30, rotationLoopPlayer, 0 )
 
     -- -- Title group animation (title + player icon) -- --
     titleGroup = display.newGroup()
@@ -170,7 +171,7 @@ function scene:show(event)
         --Runtime:addEventListener("enterFrame", ground)
 
         -- player sheet rotation loop
-        Runtime:addEventListener("enterFrame", rotationLoop)
+        --Runtime:addEventListener("enterFrame", rotationLoop)
         Runtime:addEventListener("enterFrame", rotationLoopGear)
         Runtime:addEventListener("enterFrame", rotationLoopSmallGear)
     end
@@ -188,8 +189,7 @@ function scene:hide(event)
         -- Insert code here to "pause" the scene.
         -- Example: stop timers, stop animation, stop audio, etc.
         start:removeEventListener("touch", startGame)
-        Runtime:removeEventListener("enterFrame", ground)
-        Runtime:removeEventListener("enterframe", rotationLoop)
+        --Runtime:removeEventListener("enterFrame", rotationLoop)
         Runtime:removeEventListener("enterFrame", rotationLoopGear)
         Runtime:removeEventListener("enterFrame", rotationLoopSmallGear)
         transition.cancel(downTransition)
