@@ -28,16 +28,6 @@ function startGame(event)
     end
 end
 
---[[-- groundScroller: endless ground scroll
-function groundScroller(self)
-
-    if self.x < (-900 + (self.speed*2)) then
-        self.x = 900
-    else
-        self.x = self.x - self.speed
-    end
-
-end]]
 
 -- Title animation: it's a compostition of 3 small functions that bounce the title group
 function titleTransitionDown()
@@ -61,11 +51,11 @@ function rotationLoopPlayer()
 end
 
 function rotationLoopGear()
-    --big_gear.rotation = big_gear.rotation + 0.1
+    big_gear.rotation = big_gear.rotation + 0.1
 end
 
 function rotationLoopSmallGear()
-    --small_gear.rotation = small_gear.rotation - 0.2
+    small_gear.rotation = small_gear.rotation - 0.2
 end
 
 -------------------------------------- MENU EVENTS --------------------------------------
@@ -108,7 +98,7 @@ function scene:create(event)
     title.y = display.contentCenterY
     menuScene:insert(title)
 
-    -- Ground
+    --[[-- Ground
     ground = display.newImageRect("res/ground.png",900,162)
     ground.anchorX = 0
     ground.anchorY = 1
@@ -116,14 +106,32 @@ function scene:create(event)
     ground.y = display.viewableContentHeight
     physics.addBody(ground, "static", {density=.1, bounce=.1, friction=.2})
     ground.speed = 4
-    menuScene:insert(ground)
+    menuScene:insert(ground)]]
+
+    platform = display.newImageRect('res/platform.png',900,53)
+    platform.anchorX = 0
+    platform.anchorY = 1
+    platform.x = 0
+    platform.y = display.viewableContentHeight - 110
+    physics.addBody(platform, "static", {density=.1, bounce=0.1, friction=.2})
+    platform.speed = 4
+    menuScene:insert(platform)
+
+    platform2 = display.newImageRect('res/platform.png',900,53)
+    platform2.anchorX = 0
+    platform2.anchorY = 1
+    platform2.x = platform2.width
+    platform2.y = display.viewableContentHeight - 110
+    physics.addBody(platform2, "static", {density=.1, bounce=0.1, friction=.2})
+    platform2.speed = 4
+    menuScene:insert(platform2)
 
     -- Start button
-    start = display.newImageRect("res/start_btn.png",400,100)
+    start = display.newImageRect("res/start_btn.png",300,70)
     start.anchorX = 0.5
     start.anchorY = 1
     start.x = display.contentCenterX
-    start.y = display.contentHeight - 400
+    start.y = display.contentCenterY + 400
     menuScene:insert(start)
 
     -- Player icon
@@ -167,9 +175,6 @@ function scene:show(event)
 
         start:addEventListener("touch", startGame)
 
-        --ground.enterFrame = groundScroller
-        --Runtime:addEventListener("enterFrame", ground)
-
         -- player sheet rotation loop
         --Runtime:addEventListener("enterFrame", rotationLoop)
         Runtime:addEventListener("enterFrame", rotationLoopGear)
@@ -192,6 +197,9 @@ function scene:hide(event)
         --Runtime:removeEventListener("enterFrame", rotationLoop)
         Runtime:removeEventListener("enterFrame", rotationLoopGear)
         Runtime:removeEventListener("enterFrame", rotationLoopSmallGear)
+        -- Ground listeners
+        Runtime:removeEventListener("enterFrame", platform)
+        Runtime:removeEventListener("enterFrame", platform2)
         transition.cancel(downTransition)
         transition.cancel(upTransition)
     elseif (phase == "did") then

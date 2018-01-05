@@ -48,14 +48,16 @@ function endGame(event)
     end
 end
 
--- groundScroller: function name explain itself, niub
-function groundScroller(self)
+
+-- platfromScoller: function for infinite scroll loop the platform, over the ground
+function platformScroller(self)
 
     if self.x < (-900 + (self.speed*2)) then
         self.x = 900
     else
         self.x = self.x - self.speed
     end
+
 end
 
 -- flyUpCorona: function to give force to jump up when corona sheet is tapped
@@ -121,16 +123,6 @@ function addColumns()
 
 end
 
--- groundScroller: function for scroll the platform base to reproduce forward loop movement
-function groundScroller(self)
-
-    if self.x < (-900 + (self.speed*2)) then
-        self.x = 900
-    else
-        self.x = self.x - self.speed
-    end
-end
-
 -- loop: infinte rotation of corona player sheet
 function rotationLoop()
     player.rotation = player.rotation + 10
@@ -184,9 +176,26 @@ function scene:create(event)
     ground.anchorY = 1
     ground.x = 0
     ground.y = display.contentHeight
-    physics.addBody(ground, "static", {density=.1, bounce=0.1, friction=.2})
-    ground.speed = 4
     gameScene:insert(ground)
+
+    -- Platforms
+    platform = display.newImageRect('res/platform.png',900,53)
+    platform.anchorX = 0
+    platform.anchorY = 1
+    platform.x = 0
+    platform.y = display.viewableContentHeight - 110
+    physics.addBody(platform, "static", {density=.1, bounce=0.1, friction=.2})
+    platform.speed = 10
+    gameScene:insert(platform)
+
+    platform2 = display.newImageRect('res/platform.png',900,53)
+    platform2.anchorX = 0
+    platform2.anchorY = 1
+    platform2.x = platform2.width
+    platform2.y = display.viewableContentHeight - 110
+    physics.addBody(platform2, "static", {density=.1, bounce=0.1, friction=.2})
+    platform2.speed = 10
+    gameScene:insert(platform2)
 
     -- Player icon
     player = display.newImageRect("res/corona.png",100,100)
@@ -233,8 +242,11 @@ function scene:show(event)
 
         Runtime:addEventListener("enterFrame", rotationLoop)
 
-        --ground.enterFrame = groundScroller
-        --Runtime:addEventListener("enterFrame", ground)
+        platform.enterFrame = platformScroller
+        Runtime:addEventListener("enterFrame", platform)
+
+        platform2.enterFrame = platformScroller
+        Runtime:addEventListener("enterFrame", platform2)
 
         Runtime:addEventListener("collision", endGame)
 
@@ -255,8 +267,14 @@ function scene:hide(event)
         -- Example: stop timers, stop animation, stop audio, etc.
         Runtime:removeEventListener("touch", flyUpCorona)
         Runtime:removeEventListener("enterFrame", rotationLoop)
-        --Runtime:removeEventListener("enterFrame", ground)
+
+        -- Remove platforms listeners
+        Runtime:removeEventListener("enterFrame", platform)
+        Runtime:removeEventListener("enterFrame", platform2)
+
         Runtime:removeEventListener("collision", endGame)
+
+        -- Reset timers
         timer.cancel(addColumnTimer)
         timer.cancel(moveColumnTimer)
         timer.cancel(memTimer)

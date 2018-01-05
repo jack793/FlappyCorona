@@ -163,7 +163,7 @@ function scene:create(event)
     scoresScene:insert(gameScores)
 
     -- Restart btn
-    restart = display.newImageRect("res/start_btn.png",300,65)
+    restart = display.newImageRect("res/start_btn.png",300,70)
     restart.anchorX = 0.5
     restart.anchorY = 1
     restart.x = display.contentCenterX
