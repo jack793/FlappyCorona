@@ -28,6 +28,8 @@ physics.setGravity(0,100)
 local score = 0
 local gameStarted = false
 
+paused = false
+
 ------------------------------------ GAME FUNCTIONS -------------------------------------
 
 -- ||| getThisGameScore: only for debugging |||
@@ -39,12 +41,49 @@ end
 function endGame(event)
     if (event.phase == "began") then
         getThisGameScore()
+        pause_btn.alpha = 0
 
         -- WE SET A GLOBAL COMPOSER VARIABLE, VISIBLE TO ALL SCENES TROUGHT COMPOSER, CALLED 'finalscore'
         composer.setVariable("finalScore", score)
 
         -- Finally, go to the end game scene
         composer.gotoScene("scores",{timer=800, effect="crossFade"})
+    end
+end
+
+function pause(event)
+    if event.phase == "began" then
+        if paused == false then
+            Runtime:removeEventListener("touch", flyUpCorona)
+            Runtime:removeEventListener("enterFrame", rotationLoop)
+
+            -- Remove platforms listeners
+            Runtime:removeEventListener("enterFrame", platform)
+            Runtime:removeEventListener("enterFrame", platform2)
+
+            Runtime:removeEventListener("collision", endGame)
+
+            -- Reset timers
+            timer.cancel(addColumnTimer)
+            timer.cancel(moveColumnTimer)
+            physics.pause()
+            paused = true
+        elseif paused == true then
+            Runtime:addEventListener("touch", flyUpCorona)
+            Runtime:addEventListener("enterFrame", rotationLoop)
+
+            -- Remove platforms listeners
+            Runtime:addEventListener("enterFrame", platform)
+            Runtime:addEventListener("enterFrame", platform2)
+
+            Runtime:addEventListener("collision", endGame)
+
+            -- Reset timers
+            addColumnTimer = timer.performWithDelay(1000, addColumns, -1)
+            moveColumnTimer = timer.performWithDelay(2, moveColumns, -1)
+            physics.start()
+            paused = false
+        end
     end
 end
 
@@ -69,6 +108,7 @@ function flyUpCorona(event)
             player.bodyType = "dynamic"
             instructions.alpha = 0
             tb.alpha = 1
+            pause_btn.alpha = 1
             addColumnTimer = timer.performWithDelay(1000, addColumns, -1)
             moveColumnTimer = timer.performWithDelay(2, moveColumns, -1)
             gameStarted = true
@@ -170,6 +210,12 @@ function scene:create(event)
     elements.y = 0
     gameScene:insert(elements)
 
+    pause_btn = display.newImageRect("res/pause_btn.png", 100,100)
+    pause_btn.x = 50
+    pause_btn.y = 50
+    pause_btn.alpha = 0
+    gameScene:insert(pause_btn)
+
     -- Ground
     ground = display.newImageRect('res/ground.png',900,162)
     ground.anchorX = 0
@@ -242,6 +288,8 @@ function scene:show(event)
 
         Runtime:addEventListener("enterFrame", rotationLoop)
 
+        pause_btn:addEventListener("touch", pause)
+
         platform.enterFrame = platformScroller
         Runtime:addEventListener("enterFrame", platform)
 
@@ -267,6 +315,9 @@ function scene:hide(event)
         -- Example: stop timers, stop animation, stop audio, etc.
         Runtime:removeEventListener("touch", flyUpCorona)
         Runtime:removeEventListener("enterFrame", rotationLoop)
+
+        -- Pause btn
+        pause_btn:removeEventListener("touch", pause)
 
         -- Remove platforms listeners
         Runtime:removeEventListener("enterFrame", platform)
