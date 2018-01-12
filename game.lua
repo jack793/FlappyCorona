@@ -27,8 +27,7 @@ physics.setGravity(0,100)
 -- Initialize variables
 local score = 0
 local gameStarted = false
-
-paused = false
+local paused = false
 
 ------------------------------------ GAME FUNCTIONS -------------------------------------
 
@@ -54,6 +53,8 @@ end
 function pause(event)
     if event.phase == "began" then
         if paused == false then
+            pause_tb.alpha = 1
+            tb.alpha = 0
             Runtime:removeEventListener("touch", flyUpCorona)
             Runtime:removeEventListener("enterFrame", rotationLoop)
 
@@ -69,6 +70,8 @@ function pause(event)
             physics.pause()
             paused = true
         elseif paused == true then
+            pause_tb.alpha = 0
+            tb.alpha = 1
             Runtime:addEventListener("touch", flyUpCorona)
             Runtime:addEventListener("enterFrame", rotationLoop)
 
@@ -266,6 +269,15 @@ function scene:create(event)
     instructions.x = display.contentCenterX
     instructions.y = display.contentCenterY
     gameScene:insert(instructions)
+
+    -- Pause table
+    pause_tb = display.newImageRect("res/pause_tb.png",600,300)
+    pause_tb.anchorX = 0.5
+    pause_tb.anchorY = 0.5
+    pause_tb.x = display.contentCenterX
+    pause_tb.y = display.contentCenterY - 400
+    pause_tb.alpha = 0
+    gameScene:insert(pause_btn)
 
 end
 

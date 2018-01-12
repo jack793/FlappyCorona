@@ -146,7 +146,7 @@ function scene:create(event)
     scoresScene:insert(background)
 
     -- GameOver image
-    gameOver = display.newImageRect("res/gameOver.png",500,100)
+    gameOver = display.newImageRect("res/gameOver.png",670,111)
     gameOver.anchorX = 0.5
     gameOver.anchorY = 0.5
     gameOver.x = display.contentCenterX
