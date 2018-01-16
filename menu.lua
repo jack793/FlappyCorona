@@ -91,11 +91,11 @@ function scene:create(event)
     menuScene:insert(small_gear)
 
     -- Title
-    title = display.newImageRect("res/title.png",483,232)
+    title = display.newImageRect("res/title.png",600,240)
     title.anchorX = 0.5
     title.anchorY = 0.5
     title.x = display.contentCenterX - 200
-    title.y = display.contentCenterY
+    title.y = display.contentCenterY - 50
     menuScene:insert(title)
 
     --[[-- Ground
@@ -127,7 +127,7 @@ function scene:create(event)
     menuScene:insert(platform2)
 
     -- Start button
-    start = display.newImageRect("res/start_btn.png",300,70)
+    start = display.newImageRect("res/start_btn.png",400,100)
     start.anchorX = 0.5
     start.anchorY = 1
     start.x = display.contentCenterX
@@ -138,8 +138,8 @@ function scene:create(event)
     player = display.newImageRect("res/corona.png",128,128)
     player.anchorX = 0.5
     player.anchorY = 0.5
-    player.x = display.contentCenterX + 120
-    player.y = display.contentCenterY
+    player.x = display.contentCenterX + 170
+    player.y = display.contentCenterY - 50
     menuScene:insert(player)
     --timer.performWithDelay( 30, rotationLoopPlayer, 0 )
 
