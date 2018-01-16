@@ -50,11 +50,17 @@ function endGame(event)
     end
 end
 
-function pause(event)
+-- pauseGame: Pause the game
+function pauseGame(event)
     if event.phase == "began" then
         if paused == false then
+
+            -- Manage graphics elements on pause
             pause_tb.alpha = 1
             tb.alpha = 0
+            pause_btn.alpha = 0
+            pause_overlay.alpha = 1
+
             Runtime:removeEventListener("touch", flyUpCorona)
             Runtime:removeEventListener("enterFrame", rotationLoop)
 
@@ -69,9 +75,21 @@ function pause(event)
             timer.cancel(moveColumnTimer)
             physics.pause()
             paused = true
-        elseif paused == true then
+        end
+    end
+end
+
+-- resumeGame: Resume the game, timers and physics
+function resumeGame(event)
+    if event.phase == "began" then
+        if paused == true then
+
+            -- Manage graphics elements on pause
             pause_tb.alpha = 0
             tb.alpha = 1
+            pause_btn.alpha = 1
+            pause_overlay.alpha = 0
+
             Runtime:addEventListener("touch", flyUpCorona)
             Runtime:addEventListener("enterFrame", rotationLoop)
 
@@ -279,6 +297,12 @@ function scene:create(event)
     pause_tb.alpha = 0
     gameScene:insert(pause_btn)
 
+    -- Pause Overlay
+    pause_overlay = display.newRect(display.contentCenterX,display.contentCenterY,display.viewableContentWidth,display.viewableContentHeight)
+    pause_overlay:setFillColor(0,0,0,0.3)
+    pause_overlay.alpha = 0
+    gameScene:insert(pause_overlay)
+
 end
 
 ---- :SHOW
@@ -300,7 +324,8 @@ function scene:show(event)
 
         Runtime:addEventListener("enterFrame", rotationLoop)
 
-        pause_btn:addEventListener("touch", pause)
+        pause_btn:addEventListener("touch", pauseGame)
+        pause_overlay:addEventListener("touch", resumeGame)
 
         platform.enterFrame = platformScroller
         Runtime:addEventListener("enterFrame", platform)
@@ -329,7 +354,8 @@ function scene:hide(event)
         Runtime:removeEventListener("enterFrame", rotationLoop)
 
         -- Pause btn
-        pause_btn:removeEventListener("touch", pause)
+        pause_btn:removeEventListener("touch", pauseGame)
+        pause_overlay:removeEventListener("touch", resumeGame)
 
         -- Remove platforms listeners
         Runtime:removeEventListener("enterFrame", platform)
