@@ -76,7 +76,7 @@ end
 
 -- showRestart: show restart btn with scores
 function showRestart()
-    restartTransition = transition.to(restart,{time=200, alpha=1})
+    menuTransition = transition.to(menu,{time=200, alpha=1})
     scoreTextTransition = transition.to(scoreText,{time=500, alpha=1})
     bestTextTransition = transition.to(bestscoreText,{time=500, alpha=1})
 end
@@ -103,7 +103,7 @@ end
 function restartGame(event)
     if event.phase == "ended" then
         saveScores()
-        composer.gotoScene("game", {timer=1000, effect="fade"})
+        composer.gotoScene("game", {timer=1000})
     end
 end
 
@@ -162,13 +162,23 @@ function scene:create(event)
     gameScores.y = display.contentHeight + 500
     scoresScene:insert(gameScores)
 
+    -- Menu btn
+    menu = display.newImageRect("res/menu_btn.png",400,100)
+    menu.anchorX = 0.5
+    menu.anchorY = 1
+    menu.x = display.contentCenterX
+    menu.y = display.contentCenterY + 400
+    menu.alpha = 0
+    scoresScene:insert(menu)
+
     -- Restart btn
-    restart = display.newImageRect("res/menu_btn.png",400,100)
+    restart = display.newImageRect("res/restart_btn.png",200,200)
     restart.anchorX = 0.5
     restart.anchorY = 1
     restart.x = display.contentCenterX
-    restart.y = display.contentCenterY + 400
-    restart.alpha = 0
+    local bottomMarg = display.contentHeight - display.screenOriginY
+    restart.y = bottomMarg - 50
+    restart.alpha = 1
     scoresScene:insert(restart)
 
     -- Score of this game session
@@ -199,7 +209,8 @@ function scene:show( event )
         -- Code here runs when the scene is entirely on screen
         composer.removeScene("game")
 
-        restart:addEventListener("touch", gotoMenu)
+        menu:addEventListener("touch", gotoMenu)
+        restart:addEventListener("touch", restartGame)
         showGameOver()
         loadScores()
 
@@ -215,12 +226,13 @@ function scene:hide( event )
     if ( phase == "will" ) then
         -- Code here runs when the scene is on screen (but is about to go off screen)
         --
-        restart:removeEventListener("touch", gotoMenu)
+        menu:removeEventListener("touch", gotoMenu)
+        restart:removeEventListener("touch", restartGame)
         transition.cancel(fadeTransition)
         transition.cancel(scoreTransition)
         transition.cancel(scoreTextTransition)
         transition.cancel(bestTextTransition)
-        transition.cancel(restartTransition)
+        transition.cancel(menuTransition)
 
     elseif ( phase == "did" ) then
         -- Code here runs immediately after the scene goes entirely off screen

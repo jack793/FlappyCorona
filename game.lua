@@ -50,6 +50,19 @@ function endGame(event)
     end
 end
 
+function pixelateOnPause()
+    -- Transition the filter of 100 milliseconds
+    transition.to(player.fill.effect, { time=100, numPixels=20 })
+    transition.to(platform.fill.effect, { time=100, numPixels=20 })
+    transition.to(platform2.fill.effect, { time=100, numPixels=20 })
+end
+
+function removePixelate()
+    transition.to(player.fill.effect, {timer=100, numPixels=.1})
+    transition.to(platform.fill.effect, { time=100, numPixels=.1 })
+    transition.to(platform2.fill.effect, { time=100, numPixels=.1 })
+end
+
 -- pauseGame: Pause the game
 function pauseGame(event)
     if event.phase == "began" then
@@ -60,6 +73,9 @@ function pauseGame(event)
             tb.alpha = 0
             pause_btn.alpha = 0
             pause_overlay.alpha = 1
+
+            -- Add pixelate effects
+            pixelateOnPause()
 
             Runtime:removeEventListener("touch", flyUpCorona)
             Runtime:removeEventListener("enterFrame", rotationLoop)
@@ -89,6 +105,9 @@ function resumeGame(event)
             tb.alpha = 1
             pause_btn.alpha = 1
             pause_overlay.alpha = 0
+
+            -- Remove pixelate effects on game elements
+            removePixelate()
 
             Runtime:addEventListener("touch", flyUpCorona)
             Runtime:addEventListener("enterFrame", rotationLoop)
@@ -253,6 +272,7 @@ function scene:create(event)
     platform.y = display.viewableContentHeight - 110
     physics.addBody(platform, "static", {density=.1, bounce=0.1, friction=.2})
     platform.speed = 10
+    platform.fill.effect="filter.pixelate"
     gameScene:insert(platform)
 
     platform2 = display.newImageRect('res/platform.png',900,53)
@@ -262,6 +282,7 @@ function scene:create(event)
     platform2.y = display.viewableContentHeight - 110
     physics.addBody(platform2, "static", {density=.1, bounce=0.1, friction=.2})
     platform2.speed = 10
+    platform2.fill.effect="filter.pixelate"
     gameScene:insert(platform2)
 
     -- Player icon
@@ -270,6 +291,8 @@ function scene:create(event)
     player.anchorY = 0.5
     player.x = display.contentCenterX - 150
     player.y = display.contentCenterY
+    -- Set a "pixelate" filter
+    player.fill.effect = "filter.pixelate"
     physics.addBody(player, "static", {density=.1, bounce=0.1, friction=1})
     player:applyForce(0, -300, player.x, player.y)
     gameScene:insert(player)
