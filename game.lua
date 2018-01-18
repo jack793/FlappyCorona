@@ -46,7 +46,7 @@ function endGame(event)
         composer.setVariable("finalScore", score)
 
         -- Finally, go to the end game scene
-        composer.gotoScene("scores",{timer=800, effect="crossFade"})
+        composer.gotoScene("scores", {time=500, effect="fade"})
     end
 end
 
@@ -58,7 +58,8 @@ function pixelateOnPause()
 end
 
 function removePixelate()
-    transition.to(player.fill.effect, {timer=100, numPixels=.1})
+    -- Trick to remove filter effect
+    transition.to(player.fill.effect, { timer=100, numPixels=.1 })
     transition.to(platform.fill.effect, { time=100, numPixels=.1 })
     transition.to(platform2.fill.effect, { time=100, numPixels=.1 })
 end
@@ -141,9 +142,7 @@ end
 
 -- flyUpCorona: function to give force to jump up when corona sheet is tapped
 function flyUpCorona(event)
-
     if event.phase == "began" then
-
         if gameStarted == false then
             player.bodyType = "dynamic"
             instructions.alpha = 0
@@ -154,27 +153,26 @@ function flyUpCorona(event)
             gameStarted = true
             player:applyForce(0, -650, player.x, player.y)
         else
-
             player:applyForce(0, -1300, player.x, player.y)
-
         end
     end
 end
 
--- moveColumns: using for calculate player sheet and columns moves and determinate when increment current score
+-- moveColumns: using for columns movement and determinate when increment score
 function moveColumns()
-    for a = elements.numChildren,1,-1  do
-        if(elements[a].x < display.contentCenterX - 170) then
-            if elements[a].scoreAdded == false then
+    for a = columns.numChildren,1,-1  do
+        -- Right space calculated between player sheet and columns positions
+        if(columns[a].x < display.contentCenterX - 170) then
+            if columns[a].scoreAdded == false then
                 score = score + 1
                 tb.text = score
-                elements[a].scoreAdded = true
+                columns[a].scoreAdded = true
             end
         end
-        if(elements[a].x > -100) then
-            elements[a].x = elements[a].x - 12
+        if(columns[a].x > -100) then
+            columns[a].x = columns[a].x - 12
         else
-            elements:remove(elements[a])
+            columns:remove(columns[a])
         end
     end
 end
@@ -188,18 +186,19 @@ function addColumns()
     topColumn.anchorX = 0.5
     topColumn.anchorY = 1
     topColumn.x = display.contentWidth + 100
-    topColumn.y = height - 160
+    topColumn.y = height - 170
     topColumn.scoreAdded = false
     physics.addBody(topColumn, "static", {density=1, bounce=0.1, friction=.2})
-    elements:insert(topColumn)
+    columns:insert(topColumn)
 
     bottomColumn = display.newImageRect('res/bottomColumn.png',100,714)
     bottomColumn.anchorX = 0.5
     bottomColumn.anchorY = 0
     bottomColumn.x = display.contentWidth + 100
-    bottomColumn.y = height + 160
+    bottomColumn.y = height + 170
+    bottomColumn.scoreAdded = false
     physics.addBody(bottomColumn, "static", {density=1, bounce=0.1, friction=.2})
-    elements:insert(bottomColumn)
+    columns:insert(bottomColumn)
 
 end
 
@@ -241,14 +240,14 @@ function scene:create(event)
     background.speed = 4
     gameScene:insert(background)
 
-    -- use for moving and calculate scores w/ columns
-    elements = display.newGroup()
-    elements.anchorChildren = true
-    elements.anchorX = 0
-    elements.anchorY = 1
-    elements.x = 0
-    elements.y = 0
-    gameScene:insert(elements)
+    -- Graphic group used for moving and calculate scores w/ columns
+    columns = display.newGroup()
+    --elements.anchorChildren = true
+    columns.anchorX = 0
+    columns.anchorY = 1
+    columns.x = 0
+    columns.y = 0
+    gameScene:insert(columns)
 
     pause_btn = display.newImageRect("res/pause_btn.png", 100,100)
     pause_btn.x = 50
@@ -342,6 +341,7 @@ function scene:show(event)
         -- Example: start timers, begin animation, play audio, etc.
 
         composer.removeScene("menu")
+        composer.removeScene("scores")
 
         Runtime:addEventListener("touch", flyUpCorona)
 

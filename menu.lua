@@ -98,16 +98,6 @@ function scene:create(event)
     title.y = display.contentCenterY - 50
     menuScene:insert(title)
 
-    --[[-- Ground
-    ground = display.newImageRect("res/ground.png",900,162)
-    ground.anchorX = 0
-    ground.anchorY = 1
-    ground.x = 0
-    ground.y = display.viewableContentHeight
-    physics.addBody(ground, "static", {density=.1, bounce=.1, friction=.2})
-    ground.speed = 4
-    menuScene:insert(ground)]]
-
     platform = display.newImageRect('res/platform.png',900,53)
     platform.anchorX = 0
     platform.anchorY = 1
