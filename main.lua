@@ -17,5 +17,17 @@ display.setStatusBar(display.HiddenStatusBar)
 -- include the Corona "composer" module
 local composer = require "composer"
 
--- load menu screen
-composer.gotoScene("menu")
+-- load splash screen
+local opt = {
+    effect = "crossFade",
+    time = 2000
+}
+composer.gotoScene("splash", opt)
+
+-----------------------------------------------------------------------------------------
+------------ TODO
+-- [x] exit button
+-- [] implement sound
+-- [] blurried all on pause
+-- [x] splash screen
+-----------------------------------------------------------------------------------------

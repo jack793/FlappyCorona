@@ -32,16 +32,24 @@ end
 -- Title animation: it's a compostition of 3 small functions that bounce the title group
 function titleTransitionDown()
     downTransition = transition.to(titleGroup,{time=400, y=titleGroup.y+20,onComplete=titleTransitionUp})
-
 end
 
 function titleTransitionUp()
     upTransition = transition.to(titleGroup,{time=400, y=titleGroup.y-20, onComplete=titleTransitionDown})
-
 end
 
 function titleAnimation()
     titleTransitionDown()
+end
+
+-- closeApp
+function closeApp()
+    if  system.getInfo("platformName")=="Android" then
+        native.requestExit()
+    else
+        os.exit()
+    end
+
 end
 
 -- rotation loop functions
@@ -124,6 +132,14 @@ function scene:create(event)
     start.y = display.contentCenterY + 400
     menuScene:insert(start)
 
+    -- Exit button
+    exit = display.newImageRect("res/pause_btn.png",200,200)
+    exit.anchorX = 0.5
+    exit.anchorY = 1
+    exit.x = display.contentCenterX
+    exit.y = display.contentCenterY + 700
+    menuScene:insert(exit)
+
     -- Player icon
     player = display.newImageRect("res/corona.png",128,128)
     player.anchorX = 0.5
@@ -145,7 +161,8 @@ function scene:create(event)
     titleGroup:insert(player)
 
     menuScene:insert(titleGroup)
-    titleAnimation() -- bounce animation of the entire title --
+    timer.performWithDelay(10,titleAnimation,3) -- bounce animation of the entire title --
+    -- NB: Before was only call of titleAnimation() function but cause to splashScreen wasn't a loop animation :/
 
 end
 
@@ -156,6 +173,7 @@ function scene:show(event)
     local phase = event.phase
 
     if (phase == "will") then
+        composer.removeScene("splash")
         -- Called when the scene is still off screen (but is about to come on screen).
     elseif (phase == "did") then
         -- Called when the scene is now on screen.
@@ -164,6 +182,7 @@ function scene:show(event)
         composer.removeScene("scores")
 
         start:addEventListener("touch", startGame)
+        exit:addEventListener("touch", closeApp)
 
         -- player sheet rotation loop
         --Runtime:addEventListener("enterFrame", rotationLoop)
@@ -184,6 +203,7 @@ function scene:hide(event)
         -- Insert code here to "pause" the scene.
         -- Example: stop timers, stop animation, stop audio, etc.
         start:removeEventListener("touch", startGame)
+        exit:removeEventListener("touch", closeApp)
         --Runtime:removeEventListener("enterFrame", rotationLoop)
         Runtime:removeEventListener("enterFrame", rotationLoopGear)
         Runtime:removeEventListener("enterFrame", rotationLoopSmallGear)
