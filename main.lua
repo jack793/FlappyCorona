@@ -27,7 +27,8 @@ composer.gotoScene("splash", opt)
 -----------------------------------------------------------------------------------------
 ------------ TODO
 -- [x] exit button
--- [] implement sound
+-- [] implement sound (background, ontap, gameover)
 -- [] blurried all on pause
 -- [x] splash screen
+-- [] buttons (menu, audio) on paused game
 -----------------------------------------------------------------------------------------

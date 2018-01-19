@@ -196,7 +196,6 @@ function addColumns()
     bottomColumn.anchorY = 0
     bottomColumn.x = display.contentWidth + 100
     bottomColumn.y = height + 170
-    bottomColumn.scoreAdded = false
     physics.addBody(bottomColumn, "static", {density=1, bounce=0.1, friction=.2})
     columns:insert(bottomColumn)
 

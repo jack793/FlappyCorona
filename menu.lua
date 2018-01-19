@@ -133,11 +133,11 @@ function scene:create(event)
     menuScene:insert(start)
 
     -- Exit button
-    exit = display.newImageRect("res/pause_btn.png",200,200)
+    exit = display.newImageRect("res/exit_btn.png",300,65)
     exit.anchorX = 0.5
     exit.anchorY = 1
     exit.x = display.contentCenterX
-    exit.y = display.contentCenterY + 700
+    exit.y = display.contentCenterY + 500
     menuScene:insert(exit)
 
     -- Player icon
@@ -161,7 +161,7 @@ function scene:create(event)
     titleGroup:insert(player)
 
     menuScene:insert(titleGroup)
-    timer.performWithDelay(10,titleAnimation,3) -- bounce animation of the entire title --
+    timer.performWithDelay(10,titleAnimation,2) -- bounce animation of the entire title --
     -- NB: Before was only call of titleAnimation() function but cause to splashScreen wasn't a loop animation :/
 
 end
