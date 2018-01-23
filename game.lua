@@ -39,6 +39,10 @@ end
 -- endGame: function for trigger LOSER PLAYER =((
 function endGame(event)
     if (event.phase == "began") then
+
+        -- Play the hit sound on any available channel
+        audio.play(gameOverHit)
+
         getThisGameScore()
         pause_btn.alpha = 0
 
@@ -226,6 +230,8 @@ function scene:create(event)
 
     -- Add object, listeners and interacions to gameScene
 
+    gameOverHit = audio.loadStream("res/hit.wav")
+
     -- Static Wall
     local wall = display.newImage("res/bckgrnd.png")
     gameScene:insert(wall)
@@ -357,7 +363,7 @@ function scene:show(event)
 
         Runtime:addEventListener("collision", endGame)
 
-        memTimer = timer.performWithDelay( 2000, checkMemory, 0 ) -- looppalo for memory and performance check
+        memTimer = timer.performWithDelay( 2000, checkMemory, 0 ) -- memory and performance check
 
     end
 end
