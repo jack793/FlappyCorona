@@ -75,6 +75,10 @@ function scene:create(event)
 
     -- Add object, listeners and interacions to menuScene
 
+    backgroundMusic = audio.loadStream("res/menu.wav")
+    -- Play the background music on channel 1, loop infinitely, and fade in over 5 seconds
+    backgroundMusicChannel = audio.play( backgroundMusic, { channel=1, loops=-1, fadein=2000 } )
+
     -- Background
     background = display.newImageRect("res/bckgrnd.png",900,1425)
     background.anchorX = 0.5
@@ -161,7 +165,8 @@ function scene:create(event)
     titleGroup:insert(player)
 
     menuScene:insert(titleGroup)
-    timer.performWithDelay(10,titleAnimation,2) -- bounce animation of the entire title --
+    titleAnimation()
+    --timer.performWithDelay(10,titleAnimation,2) -- bounce animation of the entire title --
     -- NB: Before was only call of titleAnimation() function but cause to splashScreen wasn't a loop animation :/
 
 end
@@ -213,6 +218,8 @@ function scene:hide(event)
         transition.cancel(downTransition)
         transition.cancel(upTransition)
     elseif (phase == "did") then
+        -- stip background menu music
+        audio.stop(1)
         -- Called immediately after scene goes off screen.
     end
 end
