@@ -24,10 +24,13 @@ physics.start()
 -- Set gravity of the scene physics
 physics.setGravity(0,100)
 
--- Initialize variables
+-- Initialize local svariables
 local score = 0
 local gameStarted = false
 local paused = false
+-- Audio
+local audioChannel = 2
+local gameOverHit = audio.loadStream("res/hit.wav")
 
 ------------------------------------ GAME FUNCTIONS -------------------------------------
 
@@ -41,7 +44,7 @@ function endGame(event)
     if (event.phase == "began") then
 
         -- Play the hit sound on any available channel
-        audio.play(gameOverHit)
+        audio.play(gameOverHit, {audioChannel=audioChannel})
 
         getThisGameScore()
         pause_btn.alpha = 0
@@ -229,8 +232,6 @@ function scene:create(event)
     gameStarted = false
 
     -- Add object, listeners and interacions to gameScene
-
-    gameOverHit = audio.loadStream("res/hit.wav")
 
     -- Static Wall
     local wall = display.newImage("res/bckgrnd.png")

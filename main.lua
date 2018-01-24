@@ -19,7 +19,7 @@ local composer = require "composer"
 
 local opt = {
     effect = "crossFade",
-    time = 2000
+    time = 1000
 }
 composer.gotoScene("menu", opt)
 
@@ -29,5 +29,5 @@ composer.gotoScene("menu", opt)
 -- [] implement sound (background, ontap, gameover)
 -- [] blurried all on pause
 -- [x] splash screen
--- [] buttons (menu, audio) on paused game
+-- []
 -----------------------------------------------------------------------------------------

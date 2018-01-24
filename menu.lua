@@ -19,6 +19,10 @@ local scene = composer.newScene()
 local physics = require "physics"
 physics.start()
 
+-- set audio active channel and audio assets
+local audioChannel = 1
+local backgroundMusic = audio.loadStream("res/menu.wav")
+
 ------------------------------------ MENU FUNCTIONS -------------------------------------
 
 -- startGame: after click start button, let's go to the game!
@@ -75,9 +79,9 @@ function scene:create(event)
 
     -- Add object, listeners and interacions to menuScene
 
-    backgroundMusic = audio.loadStream("res/menu.wav")
     -- Play the background music on channel 1, loop infinitely, and fade in over 5 seconds
-    backgroundMusicChannel = audio.play( backgroundMusic, { channel=1, loops=-1, fadein=2000 } )
+    -- Free downloaded from 'playonloop.com'
+    backgroundMusicChannel = audio.play( backgroundMusic, { channel=audioChannel, loops=-1, fadein=2000 } )
 
     -- Background
     background = display.newImageRect("res/bckgrnd.png",900,1425)
@@ -137,11 +141,11 @@ function scene:create(event)
     menuScene:insert(start)
 
     -- Exit button
-    exit = display.newImageRect("res/exit_btn.png",300,65)
+    exit = display.newImageRect("res/exit_btn.png",300,80)
     exit.anchorX = 0.5
     exit.anchorY = 1
     exit.x = display.contentCenterX
-    exit.y = display.contentCenterY + 500
+    exit.y = display.contentCenterY + 520
     menuScene:insert(exit)
 
     -- Player icon
@@ -151,7 +155,6 @@ function scene:create(event)
     player.x = display.contentCenterX + 170
     player.y = display.contentCenterY - 50
     menuScene:insert(player)
-    --timer.performWithDelay( 30, rotationLoopPlayer, 0 )
 
     -- -- Title group animation (title + player icon) -- --
     titleGroup = display.newGroup()
@@ -218,9 +221,10 @@ function scene:hide(event)
         transition.cancel(downTransition)
         transition.cancel(upTransition)
     elseif (phase == "did") then
-        -- stip background menu music
-        audio.stop(1)
-        -- Called immediately after scene goes off screen.
+        -- stop background menu music
+        audio.stop(audioChannel)
+        -- audio.fadeOut({ channel=audioChannel, time=1000 } )
+        --      fadeOut replacing .stop function don't work properly (cause a downvolume on other game sounds!)
     end
 end
 
