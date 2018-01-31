@@ -51,7 +51,8 @@ local function loadScores()
     end
 
     if (scoresTable == nil or #scoresTable == 0) then
-        scoresTable = {0}
+        -- 10 scores
+        scoresTable = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
     end
 
     -- debugging..
@@ -62,8 +63,10 @@ end
 -- saveScores: Write in the data file, always overwrite in 'w' mode (encode lua_table-->json after writing)
 local function saveScores()
 
-    --[[-- Remove previus data
-    table.remove(scoresTable, i)]]
+    -- Clear out any unneeded scores from scoresTable, because we only want to save the highest ten scores
+    for i = #scoresTable, 11, -1 do
+        table.remove(scoresTable, i)
+    end
 
     local file = io.open(filePath, "w")
 
@@ -107,6 +110,11 @@ function restartGame(event)
     end
 end
 
+-- showNewBest: NEW BEST SCORE!!!
+function showNewBest()
+    newbestTransition = transition.to(bestCup,{timer=1000, alpha=1})
+    -- TODO add victory sound
+end
 
 -------------------------------------- SCORES EVENTS -------------------------------------
 
@@ -119,19 +127,25 @@ function scene:create(event)
     -- Load the previous scores
     loadScores()
 
-    -- Save this game score into local var to print after
-    local finalScore = composer.getVariable("finalScore")
-    -- Insert the saved score from the last game into the table, then reset it
+    -- Current best score is the first value of sorted table
+    currentBest = scoresTable[1]
+
+    -- Save this game score into local var
+    finalScore = composer.getVariable("finalScore")
+    -- Insert the saved score from the last game into the table
     table.insert(scoresTable, composer.getVariable("finalScore"))
-    composer.setVariable("finalScore",0)
 
     -- Sort the table entries from highest to lowest
     local function compare( a, b )
         return a > b
     end
 
-    -- return the best
+    -- Return the bestscore
     bestscore = table.sort(scoresTable, compare)
+
+    -- Reset current game score
+    composer.setVariable("finalScore",0)
+
 
     -- With the table now sorted, let's save the data back out to scores.json by calling our saveScores() function
     saveScores()
@@ -194,6 +208,15 @@ function scene:create(event)
     bestscoreText.alpha = 0
     scoresScene:insert(bestscoreText)
 
+    -- Cup for new best
+    bestCup = display.newImageRect("res/bestCup.png",200,200)
+    bestCup.anchorX = 0.5
+    bestCup.anchorY = 1
+    bestCup.x = display.contentCenterX - 90
+    bestCup.y = display.contentCenterY + 90
+    bestCup.alpha = 0
+    scoresScene:insert(bestCup)
+
 end
 
 --- :SHOW
@@ -212,8 +235,15 @@ function scene:show( event )
         menu:addEventListener("touch", gotoMenu)
         restart:addEventListener("touch", restartGame)
         showGameOver()
+
+        -- Updated table of scores
         loadScores()
 
+        -- New record!!?
+        if finalScore > currentBest then
+            showNewBest()
+            print("new_record!")
+        end
     end
 end
 

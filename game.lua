@@ -31,6 +31,7 @@ local paused = false
 -- Audio
 local audioChannel = 2
 local gameOverHit = audio.loadStream("res/hit.wav")
+local sheetTap = audio.loadStream("res/tap.wav")
 
 ------------------------------------ GAME FUNCTIONS -------------------------------------
 
@@ -159,8 +160,10 @@ function flyUpCorona(event)
             moveColumnTimer = timer.performWithDelay(2, moveColumns, -1)
             gameStarted = true
             player:applyForce(0, -650, player.x, player.y)
+            audio.play(sheetTap)
         else
             player:applyForce(0, -1300, player.x, player.y)
+            audio.play(sheetTap)
         end
     end
 end
