@@ -35,42 +35,47 @@ local sheetTap = audio.loadStream("res/tap.wav")
 
 ------------------------------------ GAME FUNCTIONS -------------------------------------
 
--- ||| getThisGameScore: only for debugging |||
+-- ||| getThisGameScore: debugging |||
 function getThisGameScore()
     print("final score: " .. score)
 end
 
--- endGame: function for trigger LOSER PLAYER =((
+
+-- endGame: game over function callback
 function endGame(event)
     if (event.phase == "began") then
 
-        -- Play the hit sound on any available channel
+        -- Play the hit gameover sound
         audio.play(gameOverHit, {audioChannel=audioChannel})
 
-        getThisGameScore()
+        getThisGameScore() -- console log
         pause_btn.alpha = 0
 
-        -- WE SET A GLOBAL COMPOSER VARIABLE, VISIBLE TO ALL SCENES TROUGHT COMPOSER, CALLED 'finalscore'
+        -- SET A GLOBAL COMPOSER VARIABLE, VISIBLE AND USABLE TO ALL SCENES TROUGHT COMPOSER, CALLED 'finalscore'
         composer.setVariable("finalScore", score)
 
-        -- Finally, go to the end game scene
+        -- Finally, go to the gameover scene
         composer.gotoScene("scores", {time=500, effect="fade"})
     end
 end
 
+-- pixelateOnPause and removePixelate: add and remove cool pixelate effect on pause and resume the game
 function pixelateOnPause()
     -- Transition the filter of 100 milliseconds
-    transition.to(player.fill.effect, { time=100, numPixels=20 })
-    transition.to(platform.fill.effect, { time=100, numPixels=20 })
-    transition.to(platform2.fill.effect, { time=100, numPixels=20 })
+    transition.to(player.fill.effect, { time=50, numPixels=20 })
+    transition.to(platform.fill.effect, { time=50, numPixels=20 })
+    transition.to(platform2.fill.effect, { time=50, numPixels=20 })
+    --transition.to(columns.fill.effect, { time=50, numPixels=20 })
 end
 
 function removePixelate()
     -- Trick to remove filter effect
-    transition.to(player.fill.effect, { timer=100, numPixels=.1 })
-    transition.to(platform.fill.effect, { time=100, numPixels=.1 })
-    transition.to(platform2.fill.effect, { time=100, numPixels=.1 })
+    transition.to(player.fill.effect, { timer=50, numPixels=.1 })
+    transition.to(platform.fill.effect, { time=50, numPixels=.1 })
+    transition.to(platform2.fill.effect, { time=50, numPixels=.1 })
+    transition.to(columns.fill.effect, { time=50, numPixels=.1 })
 end
+
 
 -- pauseGame: Pause the game
 function pauseGame(event)
@@ -137,7 +142,7 @@ function resumeGame(event)
 end
 
 
--- platfromScoller: function for infinite scroll loop the platform, over the ground
+-- platfromScoller: function for scroll platform over the ground
 function platformScroller(self)
 
     if self.x < (-900 + (self.speed*2)) then
@@ -168,7 +173,7 @@ function flyUpCorona(event)
     end
 end
 
--- moveColumns: using for columns movement and determinate when increment score
+-- moveColumns: using for columns movement and score increment
 function moveColumns()
     for a = columns.numChildren,1,-1  do
         -- Right space calculated between player sheet and columns positions

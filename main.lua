@@ -19,7 +19,7 @@ local composer = require "composer"
 
 local opt = {
     effect = "crossFade",
-    time = 1000
+    time = 500
 }
 composer.gotoScene("menu", opt)
 
