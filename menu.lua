@@ -84,7 +84,7 @@ function scene:create(event)
     backgroundMusicChannel = audio.play( backgroundMusic, { channel=audioChannel, loops=-1, fadein=2000 } )
 
     -- Background
-    background = display.newImageRect("res/bckgrnd.png",900,1425)
+    background = display.newImageRect("res/menu_bckgrnd.png",900,1425)
     background.anchorX = 0.5
     background.anchorY = 1
     background.x = display.contentCenterX
@@ -114,7 +114,15 @@ function scene:create(event)
     title.y = display.contentCenterY - 50
     menuScene:insert(title)
 
-    platform = display.newImageRect('res/platform.png',900,53)
+    -- Ground
+    ground = display.newImageRect('res/ground.png',900,162)
+    ground.anchorX = 0
+    ground.anchorY = 1
+    ground.x = 0
+    ground.y = display.contentHeight
+    menuScene:insert(ground)
+
+    platform = display.newImageRect('res/platform.png',900,60)
     platform.anchorX = 0
     platform.anchorY = 1
     platform.x = 0
@@ -123,7 +131,7 @@ function scene:create(event)
     platform.speed = 4
     menuScene:insert(platform)
 
-    platform2 = display.newImageRect('res/platform.png',900,53)
+    platform2 = display.newImageRect('res/platform.png',900,60)
     platform2.anchorX = 0
     platform2.anchorY = 1
     platform2.x = platform2.width
