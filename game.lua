@@ -20,116 +20,237 @@ local scene = composer.newScene()
 -- include physics and data deps
 local physics = require "physics"
 physics.start()
+
 -- Set gravity of the scene physics
 physics.setGravity(0,100)
 
+-- Initialize local variables
+local score = 0
 local gameStarted = false
-
-local mydata = require("mydata")
-
------- Global useful vars -----
-centerX = display.contentCenterX
-centerY = display.contentCenterY
-screenTop = display.screenOriginY
-screenLeft = display.screenOriginX
-bottomMarg = display.contentHeight - display.screenOriginY
-rightMarg = display.contentWidth - display.screenOriginX
+local paused = false
+-- Audio
+local audioChannel = 2
+local gameOverHit = audio.loadStream("res/hit.wav")
+local sheetTap = audio.loadStream("res/tap.wav")
 
 ------------------------------------ GAME FUNCTIONS -------------------------------------
 
--- onCollision: function for trigger LOSER PLAYER =((
-function onCollision(event)
+-- getThisGameScore: debugging
+function getThisGameScore()
+    print("final score: " .. score)
+end
+
+
+-- endGame: game over function callback
+function endGame(event)
     if (event.phase == "began") then
-        composer.gotoScene("restart")
+
+        -- Play the hit gameover sound
+        audio.play(gameOverHit, {audioChannel=audioChannel})
+
+        getThisGameScore() -- console log
+        pause_btn.alpha = 0
+
+        -- SET A GLOBAL COMPOSER VARIABLE, VISIBLE AND USABLE TO ALL SCENES TROUGHT COMPOSER, CALLED 'finalscore'
+        composer.setVariable("finalScore", score)
+
+        -- Finally, go to the gameover scene
+        composer.gotoScene("scores", {time=300, effect="fade"})
     end
 end
 
-function flyUpCorona(event)
 
+-- pixelateOnPause and removePixelate: add and remove cool pixelate effect on pause and resume the game
+function pixelateOnPause()
+    -- Transition the filter of 50 milliseconds
+    transition.to(background.fill.effect, { time=50, numPixels=40 })
+    transition.to(player.fill.effect, { time=50, numPixels=20 })
+    transition.to(platform.fill.effect, { time=50, numPixels=20 })
+    transition.to(platform2.fill.effect, { time=50, numPixels=20 })
+    for i = columns.numChildren,1,-1  do
+        transition.to(columns[i].fill.effect, { time=50, numPixels=20 })
+    end
+end
+
+function removePixelate()
+    -- Trick to remove filter effect
+    transition.to(background.fill.effect, { timer=50, numPixels=.1 })
+    transition.to(player.fill.effect, { timer=50, numPixels=.1 })
+    transition.to(platform.fill.effect, { time=50, numPixels=.1 })
+    transition.to(platform2.fill.effect, { time=50, numPixels=.1 })
+    for i = columns.numChildren,1,-1  do
+        transition.to(columns[i].fill.effect, { time=50, numPixels=.1 })
+    end
+end
+
+
+-- pauseGame: Pause the game and the physics
+function pauseGame(event)
     if event.phase == "began" then
+        if paused == false then
 
-        if gameStarted == false then
-            player.bodyType = "dynamic"
-            instructions.alpha = 0
+            -- Manage graphics elements on pause
+            pause_tb.alpha = 1
+            tb.alpha = 0
+            pause_btn.alpha = 0
+            pause_overlay.alpha = 1
+
+            -- Add pixelate effects
+            pixelateOnPause()
+
+            Runtime:removeEventListener("touch", flyUpCorona)
+            Runtime:removeEventListener("enterFrame", rotationLoop)
+
+            -- Remove platforms listeners
+            Runtime:removeEventListener("enterFrame", platform)
+            Runtime:removeEventListener("enterFrame", platform2)
+
+            Runtime:removeEventListener("collision", endGame)
+
+            -- Reset timers
+            timer.cancel(addColumnTimer)
+            timer.cancel(moveColumnTimer)
+
+            physics.pause()
+            paused = true
+        end
+    end
+end
+
+
+-- resumeGame: Resume game, timers and physics
+function resumeGame(event)
+    if event.phase == "began" then
+        if paused == true then
+
+            -- Manage graphics elements on pause
+            pause_tb.alpha = 0
             tb.alpha = 1
+            pause_btn.alpha = 1
+            pause_overlay.alpha = 0
+
+            -- Remove pixelate effects on game elements
+            removePixelate()
+
+            Runtime:addEventListener("touch", flyUpCorona)
+            Runtime:addEventListener("enterFrame", rotationLoop)
+
+            -- Remove platforms listeners
+            Runtime:addEventListener("enterFrame", platform)
+            Runtime:addEventListener("enterFrame", platform2)
+
+            Runtime:addEventListener("collision", endGame)
+
+            -- Reset timers
             addColumnTimer = timer.performWithDelay(1000, addColumns, -1)
             moveColumnTimer = timer.performWithDelay(2, moveColumns, -1)
-            gameStarted = true
-            player:applyForce(0, -300, player.x, player.y)
-        else
 
-            player:applyForce(0, -600, player.x, player.y)
-
+            physics.start()
+            paused = false
         end
     end
 end
 
-function moveColumns()
-    for a = elements.numChildren,1,-1  do
-        if(elements[a].x < display.contentCenterX - 170) then
-            if elements[a].scoreAdded == false then
-                mydata.score = mydata.score + 1
-                tb.text = mydata.score
-                elements[a].scoreAdded = true
-            end
-        end
-        if(elements[a].x > -100) then
-            elements[a].x = elements[a].x - 12
-        else
-            elements:remove(elements[a])
-        end
-    end
-end
 
-function addColumns()
-
-    height = math.random(display.contentCenterY - 200, display.contentCenterY + 200)
-
-    topColumn = display.newImageRect('topColumn.png',100,714)
-    topColumn.anchorX = 0.5
-    topColumn.anchorY = 1
-    topColumn.x = display.contentWidth + 100
-    topColumn.y = height - 160
-    topColumn.scoreAdded = false
-    physics.addBody(topColumn, "static", {density=1, bounce=0.1, friction=.2})
-    elements:insert(topColumn)
-
-    bottomColumn = display.newImageRect('bottomColumn.png',100,714)
-    bottomColumn.anchorX = 0.5
-    bottomColumn.anchorY = 0
-    bottomColumn.x = display.contentWidth + 100
-    bottomColumn.y = height + 160
-    physics.addBody(bottomColumn, "static", {density=1, bounce=0.1, friction=.2})
-    elements:insert(bottomColumn)
-
-end
-
-local function checkMemory()
-    collectgarbage( "collect" )
-    local memUsage_str = string.format( "MEMORY = %.3f KB", collectgarbage( "count" ) )
-    --print( memUsage_str, "TEXTURE = "..(system.getInfo("textureMemoryUsed") / (1024 * 1024) ) )
-end
-
--- groundScroller: function for scroll the platform base to reproduce forward loop movement
-function groundScroller(self,event)
+-- platfromScoller: function for scroll platform over the ground
+function platformScroller(self)
 
     if self.x < (-900 + (self.speed*2)) then
         self.x = 900
     else
         self.x = self.x - self.speed
     end
+
 end
 
--- loop: infinte rotation of corona player sheet
-local function rotationLoop()
+
+-- flyUpCorona: function to apply force on the corona player when is tapped
+function flyUpCorona(event)
+    if event.phase == "began" then
+        if gameStarted == false then
+            player.bodyType = "dynamic"
+            instructions.alpha = 0
+            tb.alpha = 1
+            pause_btn.alpha = 1
+
+            -- Start columns timers, creation and movements
+            addColumnTimer = timer.performWithDelay(1000, addColumns, -1)
+            moveColumnTimer = timer.performWithDelay(2, moveColumns, -1)
+            gameStarted = true
+            player:applyForce(0, -650, player.x, player.y)
+
+            audio.play(sheetTap)
+        else
+            -- Player in game, just fly up the player
+            player:applyForce(0, -1300, player.x, player.y)
+
+            audio.play(sheetTap)
+        end
+    end
+end
+
+
+-- moveColumns: using for columns movement and score increment
+function moveColumns()
+    for a = columns.numChildren,1,-1  do
+        -- Right space calculated between player sheet and columns positions
+        if(columns[a].x < display.contentCenterX - 170) then
+            if columns[a].scoreAdded == false then
+                score = score + 1
+                tb.text = score
+                columns[a].scoreAdded = true
+            end
+        end
+        -- Columns speed
+        if(columns[a].x > -100) then
+            columns[a].x = columns[a].x - 12
+        else
+            -- Garbage collector remove older columns out of screen
+            columns:remove(columns[a])
+        end
+    end
+end
+
+
+-- addColumns: function that randomly generate the columns witch appears during game
+function addColumns()
+
+    height = math.random(display.contentCenterY - 200, display.contentCenterY + 200)
+
+    topColumn = display.newImageRect('res/topColumn.png',100,714)
+    topColumn.anchorX = 0.5
+    topColumn.anchorY = 1
+    topColumn.x = display.contentWidth + 100
+    topColumn.y = height - 200
+    topColumn.scoreAdded = false
+    physics.addBody(topColumn, "static", {density=1, bounce=0.1, friction=.2})
+    topColumn.fill.effect = "filter.pixelate"
+    columns:insert(topColumn)
+
+    bottomColumn = display.newImageRect('res/bottomColumn.png',100,714)
+    bottomColumn.anchorX = 0.5
+    bottomColumn.anchorY = 0
+    bottomColumn.x = display.contentWidth + 100
+    bottomColumn.y = height + 170
+    physics.addBody(bottomColumn, "static", {density=1, bounce=0.1, friction=.2})
+    bottomColumn.fill.effect = "filter.pixelate"
+    columns:insert(bottomColumn)
+
+end
+
+
+-- rotationLoop: infinite rotation of corona player sheet during game
+function rotationLoop()
     player.rotation = player.rotation + 10
 end
 
--- acceleration: function that accelerate the rotation, called when player sheet is tapped
-local function acceleration()
-    player.rotation = player.rotation + 10
-end
+--------- PERFORMANCE DEBUGGING ---------
 
+local function checkMemory()
+    collectgarbage( "collect" )
+    local memUsage_str = string.format("MEMORY = %.3f KB", collectgarbage("count"))
+    print( memUsage_str, "TEXTURE = "..(system.getInfo("textureMemoryUsed") / (1024 * 1024)))
+end
 
 -------------------------------------- GAME EVENTS --------------------------------------
 
@@ -140,7 +261,6 @@ function scene:create(event)
     local gameScene = self.view
 
     gameStarted = false
-    mydata.score = 0
 
     -- Add object, listeners and interacions to gameScene
 
@@ -155,16 +275,31 @@ function scene:create(event)
     background.x = 0
     background.y = display.contentHeight
     background.speed = 4
+    background.fill.effect = "filter.pixelate"
     gameScene:insert(background)
 
-    -- TODO ?????
-    elements = display.newGroup()
-    elements.anchorChildren = true
-    elements.anchorX = 0
-    elements.anchorY = 1
-    elements.x = 0
-    elements.y = 0
-    gameScene:insert(elements)
+    -- Graphic group used for moving and calculate scores w/ columns
+    -- (Related with addColumns() funct --
+    columns = display.newGroup()
+    columns.anchorX = 0
+    columns.anchorY = 1
+    columns.x = 0
+    columns.y = 0
+    gameScene:insert(columns)
+
+    -- Topscreen element to prevent player sheet exit from the top of the screen
+    top_bar = display.newImageRect("res/ground.png", 900,162)
+    top_bar.x = display.screenOriginX - 100
+    top_bar.y = display.screenOriginY - 100
+    physics.addBody(top_bar, "static", {density=.1, bounce=0.1, friction=.2})
+    gameScene:insert(top_bar)
+
+    -- Pause button
+    pause_btn = display.newImageRect("res/pause_btn.png", 100,100)
+    pause_btn.x = 50
+    pause_btn.y = 50
+    pause_btn.alpha = 0
+    gameScene:insert(pause_btn)
 
     -- Ground
     ground = display.newImageRect('res/ground.png',900,162)
@@ -175,35 +310,40 @@ function scene:create(event)
     gameScene:insert(ground)
 
     -- Platforms
-    platform = display.newImageRect('res/platform.png',900,53)
+    platform = display.newImageRect('res/platform.png',900,60)
     platform.anchorX = 0
     platform.anchorY = 1
     platform.x = 0
     platform.y = display.viewableContentHeight - 110
     physics.addBody(platform, "static", {density=.1, bounce=0.1, friction=.2})
-    platform.speed = 4
+    platform.speed = 10
+    platform.fill.effect="filter.pixelate"
     gameScene:insert(platform)
 
-    platform2 = display.newImageRect('res/platform.png',900,53)
+    platform2 = display.newImageRect('res/platform.png',900,60)
     platform2.anchorX = 0
     platform2.anchorY = 1
     platform2.x = platform2.width
     platform2.y = display.viewableContentHeight - 110
     physics.addBody(platform2, "static", {density=.1, bounce=0.1, friction=.2})
-    platform2.speed = 4
+    platform2.speed = 10
+    platform2.fill.effect="filter.pixelate"
     gameScene:insert(platform2)
 
     -- Player icon
-    player = display.newImageRect("res/corona.png",64,64)
+    player = display.newImageRect("res/corona.png",100,100)
     player.anchorX = 0.5
     player.anchorY = 0.5
-    player.x = display.contentCenterX + 70
-    player.y = display.contentCenterY - 200
+    player.x = display.contentCenterX - 150
+    player.y = display.contentCenterY
+    -- Set a "pixelate" filter
+    player.fill.effect = "filter.pixelate"
+    physics.addBody(player, "static", {density=.1, bounce=0.1, friction=1})
+    player:applyForce(0, -300, player.x, player.y)
     gameScene:insert(player)
 
     -- Score table
-    tb = display.newText(mydata.score,display.contentCenterX,
-        150, "pixelmix", 58)
+    tb = display.newText(score,display.contentCenterX, 150, "Arial", 58)
     tb:setFillColor(0,0,0)
     tb.alpha = 0
     gameScene:insert(tb)
@@ -215,6 +355,22 @@ function scene:create(event)
     instructions.x = display.contentCenterX
     instructions.y = display.contentCenterY
     gameScene:insert(instructions)
+
+    -- Pause table
+    pause_tb = display.newImageRect("res/pause_tb.png",600,300)
+    pause_tb.anchorX = 0.5
+    pause_tb.anchorY = 0.5
+    pause_tb.x = display.contentCenterX
+    pause_tb.y = display.contentCenterY - 400
+    pause_tb.alpha = 0
+    gameScene:insert(pause_btn)
+
+    -- Pause Overlay
+    pause_overlay = display.newRect(display.contentCenterX,display.contentCenterY,
+        display.viewableContentWidth,display.viewableContentHeight)
+    pause_overlay:setFillColor(0,0,0,0.3)
+    pause_overlay.alpha = 0
+    gameScene:insert(pause_overlay)
 
 end
 
@@ -231,8 +387,15 @@ function scene:show(event)
         -- Insert code here to make the scene come alive.
         -- Example: start timers, begin animation, play audio, etc.
 
-        composer.removeScene("start")
+        composer.removeScene("menu")
+        composer.removeScene("scores")
+
         Runtime:addEventListener("touch", flyUpCorona)
+
+        Runtime:addEventListener("enterFrame", rotationLoop)
+
+        pause_btn:addEventListener("touch", pauseGame)
+        pause_overlay:addEventListener("touch", resumeGame)
 
         platform.enterFrame = platformScroller
         Runtime:addEventListener("enterFrame", platform)
@@ -240,9 +403,9 @@ function scene:show(event)
         platform2.enterFrame = platformScroller
         Runtime:addEventListener("enterFrame", platform2)
 
-        Runtime:addEventListener("collision", onCollision)
+        Runtime:addEventListener("collision", endGame)
 
-        memTimer = timer.performWithDelay( 1000, checkMemory, 0 ) -- looppalo
+        memTimer = timer.performWithDelay( 2000, checkMemory, 0 ) -- memory and performance check
 
     end
 end
@@ -253,32 +416,51 @@ function scene:hide(event)
     local gameScene = self.view
     local phase = event.phase
 
-    if ( phase == "will" ) then
+    if (phase == "will") then
         -- Called when the scene is on screen (but is about to go off screen).
         -- Insert code here to "pause" the scene.
         -- Example: stop timers, stop animation, stop audio, etc.
-        Runtime:removeEventListener("touch", flyUp)
+        Runtime:removeEventListener("touch", flyUpCorona)
+        Runtime:removeEventListener("enterFrame", rotationLoop)
+
+        -- Pause btn
+        pause_btn:removeEventListener("touch", pauseGame)
+        pause_overlay:removeEventListener("touch", resumeGame)
+
+        -- Remove platforms listeners
         Runtime:removeEventListener("enterFrame", platform)
         Runtime:removeEventListener("enterFrame", platform2)
-        Runtime:removeEventListener("collision", onCollision)
+
+        Runtime:removeEventListener("collision", endGame)
+
+        -- Reset timers
         timer.cancel(addColumnTimer)
         timer.cancel(moveColumnTimer)
         timer.cancel(memTimer)
 
-
-    elseif ( phase == "did" ) then
+    elseif (phase == "did") then
         -- Called immediately after scene goes off screen.
     end
+end
+
+---- :DESTROY
+function scene:destroy( event )
+
+    local sceneGroup = self.view
+
+    -- Called prior to the removal of scene's view ("sceneGroup").
+    -- Insert code here to clean up the scene.
+    -- Example: remove display objects, save state, etc.
 end
 
 
 ---------------------------------------------------------------------------------
 
 -- Listener setup
-scene:addEventListener( "create", scene )
-scene:addEventListener( "show", scene )
-scene:addEventListener( "hide", scene )
-scene:addEventListener( "destroy", scene )
+scene:addEventListener("create", scene)
+scene:addEventListener("show", scene)
+scene:addEventListener("hide", scene)
+scene:addEventListener("destroy", scene)
 
 ---------------------------------------------------------------------------------
 

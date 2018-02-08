@@ -115,4 +115,15 @@ fabric.properties
 
 *.iml
 
+### Imgs and resources ###
+
 res/
+
+### Documentation ###
+
+docs/
+
+### !!Buildings!! ###
+
+builds/
+
