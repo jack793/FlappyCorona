@@ -24,7 +24,7 @@ physics.start()
 -- Set gravity of the scene physics
 physics.setGravity(0,100)
 
--- Initialize local svariables
+-- Initialize local variables
 local score = 0
 local gameStarted = false
 local paused = false
@@ -35,7 +35,7 @@ local sheetTap = audio.loadStream("res/tap.wav")
 
 ------------------------------------ GAME FUNCTIONS -------------------------------------
 
--- ||| getThisGameScore: debugging |||
+-- getThisGameScore: debugging
 function getThisGameScore()
     print("final score: " .. score)
 end
@@ -55,29 +55,36 @@ function endGame(event)
         composer.setVariable("finalScore", score)
 
         -- Finally, go to the gameover scene
-        composer.gotoScene("scores", {time=500, effect="fade"})
+        composer.gotoScene("scores", {time=300, effect="fade"})
     end
 end
 
+
 -- pixelateOnPause and removePixelate: add and remove cool pixelate effect on pause and resume the game
 function pixelateOnPause()
-    -- Transition the filter of 100 milliseconds
+    -- Transition the filter of 50 milliseconds
+    transition.to(background.fill.effect, { time=50, numPixels=40 })
     transition.to(player.fill.effect, { time=50, numPixels=20 })
     transition.to(platform.fill.effect, { time=50, numPixels=20 })
     transition.to(platform2.fill.effect, { time=50, numPixels=20 })
-    --transition.to(columns.fill.effect, { time=50, numPixels=20 })
+    for i = columns.numChildren,1,-1  do
+        transition.to(columns[i].fill.effect, { time=50, numPixels=20 })
+    end
 end
 
 function removePixelate()
     -- Trick to remove filter effect
+    transition.to(background.fill.effect, { timer=50, numPixels=.1 })
     transition.to(player.fill.effect, { timer=50, numPixels=.1 })
     transition.to(platform.fill.effect, { time=50, numPixels=.1 })
     transition.to(platform2.fill.effect, { time=50, numPixels=.1 })
-    transition.to(columns.fill.effect, { time=50, numPixels=.1 })
+    for i = columns.numChildren,1,-1  do
+        transition.to(columns[i].fill.effect, { time=50, numPixels=.1 })
+    end
 end
 
 
--- pauseGame: Pause the game
+-- pauseGame: Pause the game and the physics
 function pauseGame(event)
     if event.phase == "began" then
         if paused == false then
@@ -103,13 +110,15 @@ function pauseGame(event)
             -- Reset timers
             timer.cancel(addColumnTimer)
             timer.cancel(moveColumnTimer)
+
             physics.pause()
             paused = true
         end
     end
 end
 
--- resumeGame: Resume the game, timers and physics
+
+-- resumeGame: Resume game, timers and physics
 function resumeGame(event)
     if event.phase == "began" then
         if paused == true then
@@ -135,6 +144,7 @@ function resumeGame(event)
             -- Reset timers
             addColumnTimer = timer.performWithDelay(1000, addColumns, -1)
             moveColumnTimer = timer.performWithDelay(2, moveColumns, -1)
+
             physics.start()
             paused = false
         end
@@ -153,7 +163,8 @@ function platformScroller(self)
 
 end
 
--- flyUpCorona: function to give force to jump up when corona sheet is tapped
+
+-- flyUpCorona: function to apply force on the corona player when is tapped
 function flyUpCorona(event)
     if event.phase == "began" then
         if gameStarted == false then
@@ -161,17 +172,23 @@ function flyUpCorona(event)
             instructions.alpha = 0
             tb.alpha = 1
             pause_btn.alpha = 1
+
+            -- Start columns timers, creation and movements
             addColumnTimer = timer.performWithDelay(1000, addColumns, -1)
             moveColumnTimer = timer.performWithDelay(2, moveColumns, -1)
             gameStarted = true
             player:applyForce(0, -650, player.x, player.y)
+
             audio.play(sheetTap)
         else
+            -- Player in game, just fly up the player
             player:applyForce(0, -1300, player.x, player.y)
+
             audio.play(sheetTap)
         end
     end
 end
+
 
 -- moveColumns: using for columns movement and score increment
 function moveColumns()
@@ -184,13 +201,16 @@ function moveColumns()
                 columns[a].scoreAdded = true
             end
         end
+        -- Columns speed
         if(columns[a].x > -100) then
             columns[a].x = columns[a].x - 12
         else
+            -- Garbage collector remove older columns out of screen
             columns:remove(columns[a])
         end
     end
 end
+
 
 -- addColumns: function that randomly generate the columns witch appears during game
 function addColumns()
@@ -201,9 +221,10 @@ function addColumns()
     topColumn.anchorX = 0.5
     topColumn.anchorY = 1
     topColumn.x = display.contentWidth + 100
-    topColumn.y = height - 170
+    topColumn.y = height - 200
     topColumn.scoreAdded = false
     physics.addBody(topColumn, "static", {density=1, bounce=0.1, friction=.2})
+    topColumn.fill.effect = "filter.pixelate"
     columns:insert(topColumn)
 
     bottomColumn = display.newImageRect('res/bottomColumn.png',100,714)
@@ -212,11 +233,13 @@ function addColumns()
     bottomColumn.x = display.contentWidth + 100
     bottomColumn.y = height + 170
     physics.addBody(bottomColumn, "static", {density=1, bounce=0.1, friction=.2})
+    bottomColumn.fill.effect = "filter.pixelate"
     columns:insert(bottomColumn)
 
 end
 
--- loop: infinte rotation of corona player sheet
+
+-- rotationLoop: infinite rotation of corona player sheet during game
 function rotationLoop()
     player.rotation = player.rotation + 10
 end
@@ -252,17 +275,26 @@ function scene:create(event)
     background.x = 0
     background.y = display.contentHeight
     background.speed = 4
+    background.fill.effect = "filter.pixelate"
     gameScene:insert(background)
 
     -- Graphic group used for moving and calculate scores w/ columns
+    -- (Related with addColumns() funct --
     columns = display.newGroup()
-    --elements.anchorChildren = true
     columns.anchorX = 0
     columns.anchorY = 1
     columns.x = 0
     columns.y = 0
     gameScene:insert(columns)
 
+    -- Topscreen element to prevent player sheet exit from the top of the screen
+    top_bar = display.newImageRect("res/ground.png", 900,162)
+    top_bar.x = display.screenOriginX - 100
+    top_bar.y = display.screenOriginY - 100
+    physics.addBody(top_bar, "static", {density=.1, bounce=0.1, friction=.2})
+    gameScene:insert(top_bar)
+
+    -- Pause button
     pause_btn = display.newImageRect("res/pause_btn.png", 100,100)
     pause_btn.x = 50
     pause_btn.y = 50
@@ -278,7 +310,7 @@ function scene:create(event)
     gameScene:insert(ground)
 
     -- Platforms
-    platform = display.newImageRect('res/platform.png',900,53)
+    platform = display.newImageRect('res/platform.png',900,60)
     platform.anchorX = 0
     platform.anchorY = 1
     platform.x = 0
@@ -288,7 +320,7 @@ function scene:create(event)
     platform.fill.effect="filter.pixelate"
     gameScene:insert(platform)
 
-    platform2 = display.newImageRect('res/platform.png',900,53)
+    platform2 = display.newImageRect('res/platform.png',900,60)
     platform2.anchorX = 0
     platform2.anchorY = 1
     platform2.x = platform2.width
@@ -334,7 +366,8 @@ function scene:create(event)
     gameScene:insert(pause_btn)
 
     -- Pause Overlay
-    pause_overlay = display.newRect(display.contentCenterX,display.contentCenterY,display.viewableContentWidth,display.viewableContentHeight)
+    pause_overlay = display.newRect(display.contentCenterX,display.contentCenterY,
+        display.viewableContentWidth,display.viewableContentHeight)
     pause_overlay:setFillColor(0,0,0,0.3)
     pause_overlay.alpha = 0
     gameScene:insert(pause_overlay)

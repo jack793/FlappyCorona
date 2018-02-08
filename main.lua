@@ -21,13 +21,5 @@ local opt = {
     effect = "crossFade",
     time = 500
 }
-composer.gotoScene("menu", opt)
 
------------------------------------------------------------------------------------------
------------- TODO
--- [x] exit button
--- [] implement sound (background, ontap, gameover)
--- [] blurried all on pause
--- [x] splash screen
--- []
------------------------------------------------------------------------------------------
+composer.gotoScene("menu", opt)

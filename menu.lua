@@ -46,8 +46,10 @@ function titleAnimation()
     titleTransitionDown()
 end
 
+
 -- closeApp
 function closeApp()
+    -- detect os type
     if  system.getInfo("platformName")=="Android" then
         native.requestExit()
     else
@@ -55,6 +57,7 @@ function closeApp()
     end
 
 end
+
 
 -- rotation loop functions
 -- TODO Refactor in 2 functions with input parameters
@@ -122,6 +125,7 @@ function scene:create(event)
     ground.y = display.contentHeight
     menuScene:insert(ground)
 
+    -- platforms
     platform = display.newImageRect('res/platform.png',900,60)
     platform.anchorX = 0
     platform.anchorY = 1
@@ -166,7 +170,7 @@ function scene:create(event)
 
     -- -- Title group animation (title + player icon) -- --
     titleGroup = display.newGroup()
-    -- titleGroup.anchorChildren = true <<<---- This line destroy layout cause the corona logo animation
+    -- titleGroup.anchorChildren = true <<<---- This line destroy layout, the cause is player animation
     titleGroup.anchorX = 0.5
     titleGroup.anchorY = 0.5
     titleGroup.x = display.contentCenterX - 260
@@ -177,9 +181,6 @@ function scene:create(event)
 
     menuScene:insert(titleGroup)
     titleAnimation()
-    --timer.performWithDelay(10,titleAnimation,2) -- bounce animation of the entire title --
-    -- NB: Before was only call of titleAnimation() function but cause to splashScreen wasn't a loop animation :/
-
 end
 
 ---- :SHOW
@@ -200,8 +201,7 @@ function scene:show(event)
         start:addEventListener("touch", startGame)
         exit:addEventListener("touch", closeApp)
 
-        -- player sheet rotation loop
-        --Runtime:addEventListener("enterFrame", rotationLoop)
+        -- Gears animations
         Runtime:addEventListener("enterFrame", rotationLoopGear)
         Runtime:addEventListener("enterFrame", rotationLoopSmallGear)
     end
@@ -220,16 +220,18 @@ function scene:hide(event)
         -- Example: stop timers, stop animation, stop audio, etc.
         start:removeEventListener("touch", startGame)
         exit:removeEventListener("touch", closeApp)
-        --Runtime:removeEventListener("enterFrame", rotationLoop)
+
+        -- Gears listeners
         Runtime:removeEventListener("enterFrame", rotationLoopGear)
         Runtime:removeEventListener("enterFrame", rotationLoopSmallGear)
+
         -- Ground listeners
         Runtime:removeEventListener("enterFrame", platform)
         Runtime:removeEventListener("enterFrame", platform2)
         transition.cancel(downTransition)
         transition.cancel(upTransition)
     elseif (phase == "did") then
-        -- stop background menu music
+        -- Stop background menu music
         audio.stop(audioChannel)
         -- audio.fadeOut({ channel=audioChannel, time=1000 } )
         --      fadeOut replacing .stop function don't work properly (cause a downvolume on other game sounds!)

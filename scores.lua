@@ -22,14 +22,16 @@ physics.start()
 -- Set gravity of the scene physics
 physics.setGravity(0,100)
 
--- Initialize  DATA variables
+-- Initialize data variables
 local json = require("json")
 
 local scoresTable = {}
 
-local filePath = system.pathForFile("scores.json", system.DocumentsDirectory)
+local filePath = system.pathForFile("scores.json", system.DocumentsDirectory) -- path is the sandbox app
 
 ------------------------------------ SCORES FUNCTIONS -----------------------------------
+
+------------  DATA LIBRARY  -------------
 
 -- loadScores: Read all contents from our persistent data file (decode json-->lua_table to read)
 local function loadScores()
@@ -51,7 +53,7 @@ local function loadScores()
     end
 
     if (scoresTable == nil or #scoresTable == 0) then
-        -- 10 scores
+        -- best top 10 scores
         scoresTable = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
     end
 
@@ -77,6 +79,9 @@ local function saveScores()
     end
 end
 
+------------ END OF DATA LIBRARY ------------
+
+
 -- showRestart: show restart btn with scores
 function showRestart()
     menuTransition = transition.to(menu,{time=200, alpha=1})
@@ -84,17 +89,20 @@ function showRestart()
     bestTextTransition = transition.to(bestscoreText,{time=500, alpha=1})
 end
 
+
 -- showScore: fadeIn scores calling showRestart() funct
 function showScore()
     scoreTransition = transition.to(gameScores,{time=500, y=display.contentCenterY,onComplete=showRestart})
 end
 
--- showGameOver: fadeIn 'gameover' image on the top of screen, it's the first thing to do..LOSEEER
+
+-- showGameOver: fadeIn 'gameover' image on the top of screen
 function showGameOver()
     fadeTransition = transition.to(gameOver,{time=500, alpha=1,onComplete=showScore})
 end
 
--- gotoMenu explain itself
+
+-- gotoMenu: redirect to the initial menu scene
 function gotoMenu(event)
     if event.phase == "ended" then
         saveScores()
@@ -102,13 +110,15 @@ function gotoMenu(event)
     end
 end
 
--- restartGame: play again!
+
+-- restartGame: play again right now!
 function restartGame(event)
     if event.phase == "ended" then
         saveScores()
         composer.gotoScene("game", {timer=1000})
     end
 end
+
 
 -- showNewBest: NEW BEST SCORE!!!
 function showNewBest()
@@ -123,6 +133,9 @@ function scene:create(event)
 
     local scoresScene = self.view
     -- Code here runs when the scene is first created but has not yet appeared on screen
+
+    ------------- LOAD/SAVE PERSISTENTE DATA  -------------
+    ---------------------------------------------------------
 
     -- Load the previous scores
     loadScores()
@@ -146,9 +159,12 @@ function scene:create(event)
     -- Reset current game score
     composer.setVariable("finalScore",0)
 
-
     -- With the table now sorted, let's save the data back out to scores.json by calling our saveScores() function
     saveScores()
+
+
+    ---------------------------------------------------------
+    ---------------------------------------------------------
 
     -- Background
     background = display.newImageRect("res/bckgrnd.png",900,1425)
@@ -195,20 +211,21 @@ function scene:create(event)
     restart.alpha = 1
     scoresScene:insert(restart)
 
-    -- Score of this game session
+    -- Score text of this game session
     scoreText = display.newText(finalScore,display.contentCenterX + 110,
         display.contentCenterY - 60, native.systemFont, 50)
     scoreText:setFillColor(0,0,0)
     scoreText.alpha = 0
     scoresScene:insert(scoreText)
 
+    -- Best score text
     bestscoreText = display.newText(scoresTable[1],display.contentCenterX + 110,
         display.contentCenterY + 85, native.systemFont, 50)
     bestscoreText:setFillColor(0,0,0)
     bestscoreText.alpha = 0
     scoresScene:insert(bestscoreText)
 
-    -- Cup for new best
+    -- Gold cup for new best
     bestCup = display.newImageRect("res/bestCup.png",200,200)
     bestCup.anchorX = 0.5
     bestCup.anchorY = 1
